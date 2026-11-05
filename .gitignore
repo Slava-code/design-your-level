@@ -1,0 +1,13 @@
+# secrets: never commit
+.env
+.env.*
+!.env.example
+# deps / build
+node_modules/
+.next/
+out/
+.vercel/
+*.log
+.DS_Store
+# printable code sheets (contain live team codes)
+print/
