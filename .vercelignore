@@ -1,0 +1,11 @@
+# Keep local-only files out of Vercel uploads (print/ holds the real team codes).
+.env
+.env.*
+!.env.example
+print/
+spike/out/
+test-results/
+playwright-report/
+.next/
+.next-*/
+tsconfig.tsbuildinfo
