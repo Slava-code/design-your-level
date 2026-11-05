@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AnswersResponse, CancelResponse, GenerationView, SubmitResponse } from "@/lib/types";
 import { Button, ProgressStages, useToast, cx } from "@/components/ui";
-import { post, usd } from "./api";
+import { post, cr } from "./api";
 import { Storyboard, Captions } from "./Storyboard";
 import { useNow } from "./useNow";
 import s from "./design.module.css";
@@ -324,7 +324,7 @@ function Result({ gen, version, submittedId, canSubmit, refresh, onRestore, rest
 
       <footer className={s.resultFoot}>
         <span className={s.resultMeta}>
-          {usd(gen.costUsd)} {secs > 0 ? ` · ${Math.round(secs)}s` : ""}
+          {cr(gen.costUsd)} {secs > 0 ? ` · ${Math.round(secs)}s` : ""}
           {gen.askedQuestions ? " · with questions" : ""}
         </span>
         {canSubmit && (
@@ -354,7 +354,7 @@ function Failed({ gen, version, onEdit }: { gen: GenerationView; version: number
     gen.status === "flagged"
       ? "Nothing was charged."
       : charged
-        ? `This attempt used ${usd(gen.costUsd)} of your budget.`
+        ? `This attempt used ${cr(gen.costUsd)}.`
         : "Nothing was charged.";
   const advice =
     gen.status === "refused"

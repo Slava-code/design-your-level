@@ -116,11 +116,11 @@ export function TeamHeader({ state, serverOffsetMs, refresh }: Props) {
         <div className={s.budgetRow}>
           <BudgetMeter
             spentUsd={team.spendUsd}
-            reservedUsd={team.reservedUsd}
             budgetUsd={team.budgetUsd}
+            unit="credits"
             perGenerationUsd={perGen}
             compact
-            label="Team budget"
+            label="Team credits"
           />
         </div>
       )}

@@ -116,6 +116,8 @@ export type GenerationAdminView = GenerationView & {
   modelText: string | null;
   modelImage: string | null;
   errorDetail: string | null;
+  /** Per-call cost breakdown: {followup|prompt|image: {usd, ms, ...token counts}}. */
+  costDetail: Record<string, Record<string, number | null>>;
 };
 
 // ---------------------------------------------------------------------------------------------

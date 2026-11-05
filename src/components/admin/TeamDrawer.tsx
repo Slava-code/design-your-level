@@ -122,10 +122,10 @@ export function TeamDrawer({
               </span>
               <span className={s.meta}>joined {clock(team.joinedAt)}</span>
               <div className={s.headBudget}>
-                <BudgetMeter spentUsd={team.spendUsd} budgetUsd={team.budgetUsd} reservedUsd={team.reservedUsd} label="Budget" />
+                <BudgetMeter unit="credits" spentUsd={team.spendUsd} budgetUsd={team.budgetUsd} reservedUsd={team.reservedUsd} label="Credits" />
               </div>
               <Button size="sm" variant="secondary" onClick={() => onResetBudget(team)} disabled={team.spendUsd <= 0 && team.reservedUsd <= 0}>
-                Reset budget
+                Reset credits
               </Button>
             </div>
           )}
@@ -260,6 +260,18 @@ function GenerationCard({ g, n }: { g: GenerationAdminView; n: number }) {
             {g.modelText ?? "--"} / {g.modelImage ?? "--"}
             {g.reservedUsd > 0 && <> · {usd(g.reservedUsd, 3)} reserved</>}
           </p>
+          {Object.keys(g.costDetail ?? {}).length > 0 && (
+            <p className={s.models}>
+              {(["followup", "prompt", "image"] as const)
+                .filter((k) => g.costDetail[k])
+                .map((k) => {
+                  const d = g.costDetail[k];
+                  const label = k === "followup" ? "questions" : k === "prompt" ? "prompt writer" : "image";
+                  return `${label} ${usd(Number(d.usd ?? 0), 4)}${d.ms ? ` (${(Number(d.ms) / 1000).toFixed(1)}s)` : ""}`;
+                })
+                .join(" · ")}
+            </p>
+          )}
         </div>
       </div>
     </article>

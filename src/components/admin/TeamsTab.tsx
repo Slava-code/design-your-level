@@ -5,6 +5,7 @@ import { BudgetMeter, Button, ConfirmDialog, StatusPill, useToast } from "@/comp
 import type { AdminState, AdminTeamRow, ResetBudgetResponse } from "@/lib/types";
 import { activityPill, ago, api, clock, usd } from "./lib";
 import { TeamDrawer } from "./TeamDrawer";
+import { toCredits } from "@/lib/credits";
 import s from "./admin.module.css";
 
 export function TeamsTab({ state, now, refresh }: { state: AdminState; now: number; refresh: () => void }) {
@@ -24,7 +25,7 @@ export function TeamsTab({ state, now, refresh }: { state: AdminState; now: numb
       toast.success(`${resetFor.name}: spend back to $0.00. Their work is kept.`, { title: "Budget reset" });
       setResetFor(null);
       refresh();
-    } else toast.error(r.error, { title: "Could not reset budget" });
+    } else toast.error(r.error, { title: "Could not reset credits" });
   }
 
   return (
@@ -54,7 +55,7 @@ export function TeamsTab({ state, now, refresh }: { state: AdminState; now: numb
                 <th scope="col">Activity</th>
                 <th scope="col">Seen</th>
                 <th scope="col" className={s.budgetCol}>
-                  Spend / budget
+                  Credits used
                 </th>
                 <th scope="col" className={s.num}>
                   Gens
@@ -96,7 +97,7 @@ export function TeamsTab({ state, now, refresh }: { state: AdminState; now: numb
                       </span>
                     </td>
                     <td className={s.budgetCol}>
-                      <BudgetMeter compact spentUsd={team.spendUsd} budgetUsd={team.budgetUsd} reservedUsd={team.reservedUsd} />
+                      <BudgetMeter compact unit="credits" spentUsd={team.spendUsd} budgetUsd={team.budgetUsd} reservedUsd={team.reservedUsd} />
                     </td>
                     <td className={s.num}>
                       <span className={s.bigNum}>{team.generationCount}</span>
@@ -125,7 +126,7 @@ export function TeamsTab({ state, now, refresh }: { state: AdminState; now: numb
                           View
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => setResetFor(team)} disabled={team.spendUsd <= 0 && team.reservedUsd <= 0}>
-                          Reset budget
+                          Reset credits
                         </Button>
                       </div>
                     </td>
@@ -146,16 +147,16 @@ export function TeamsTab({ state, now, refresh }: { state: AdminState; now: numb
 
       <ConfirmDialog
         open={!!resetFor}
-        title={resetFor ? `Reset ${resetFor.name}'s budget?` : "Reset budget?"}
+        title={resetFor ? `Reset ${resetFor.name}'s credits?` : "Reset credits?"}
         body={
           resetFor && (
             <p>
-              Sets spend back to $0.00 so they get the full {usd(resetFor.budgetUsd)} again. Their generations and submission are kept.
-              They have spent {usd(resetFor.spendUsd)} so far. Real money already spent still counts toward the $50 project cap.
+              Gives them the full {toCredits(resetFor.budgetUsd)} credits again. Their generations and submission are kept.
+              They have used {toCredits(resetFor.spendUsd)} credits ({usd(resetFor.spendUsd, 3)} of real OpenAI cost), which still counts toward the $50 project cap.
             </p>
           )
         }
-        confirmLabel="Reset budget"
+        confirmLabel="Reset credits"
         busy={busy}
         onConfirm={doReset}
         onCancel={() => setResetFor(null)}

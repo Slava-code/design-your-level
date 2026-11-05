@@ -64,12 +64,24 @@ export async function reserveForAnswers(id: string, slot: number, est: number, a
 }
 
 /** Add actual cost to the generation and the team's spend (reservation untouched). Always applied. */
-export async function charge(id: string, usd: number): Promise<void> {
-  if (!(usd > 0)) return;
+export async function charge(
+  id: string,
+  usd: number,
+  stage?: "followup" | "prompt" | "image",
+  detail?: Record<string, number>,
+  ms?: number,
+): Promise<void> {
+  const amount = usd > 0 ? usd : 0;
+  // Record what each AI call cost (with its token counts) even when it was free, for auditing.
+  const entry = stage ? JSON.stringify({ [stage]: { usd: amount, ms: ms ?? null, ...(detail ?? {}) } }) : null;
+  if (!(amount > 0) && !entry) return;
   await q(
-    `WITH g AS (UPDATE generations SET cost_usd = cost_usd + $2, updated_at = now() WHERE id = $1 RETURNING slot)
-     UPDATE teams SET spend_usd = spend_usd + $2 FROM g WHERE teams.slot = g.slot`,
-    [id, usd],
+    `WITH g AS (UPDATE generations SET cost_usd = cost_usd + $2,
+                       cost_detail = CASE WHEN $3::jsonb IS NULL THEN cost_detail ELSE cost_detail || $3::jsonb END,
+                       updated_at = now()
+                 WHERE id = $1 RETURNING slot)
+     UPDATE teams SET spend_usd = spend_usd + $2 FROM g WHERE teams.slot = g.slot AND $2 > 0`,
+    [id, amount, entry],
   );
 }
 

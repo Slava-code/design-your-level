@@ -141,7 +141,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <table>
     <tr><th>Rule</th><th>What it means in practice</th></tr>
     <tr><td>Teams of 4, one code card each</td><td>One person types on one phone or laptop. Teammates can join with the same code to watch, but each device keeps its own unsaved draft, so only the typist should fill in the form.</td></tr>
-    <tr><td>Budget: $5 per team</td><td>A storyboard costs about $0.04-0.06, so a team can redraw dozens of times. Refused attempts count against the budget too. Shown as a bar under the team name.</td></tr>
+    <tr><td>500 credits per team</td><td>Teams never see dollars. 1 credit = $0.01 of real AI cost, so a storyboard uses about 4-6 credits and a team can redraw dozens of times. Refused attempts use credits too. Shown as "used / 500 credits" and "N left" under the team name. The bar only moves when credits are actually used, not while a drawing is running.</td></tr>
     <tr><td>One round of follow-up questions</td><td>Before the first storyboard the AI asks 0-3 short questions (each can be skipped). Redraws go straight to the picture unless the team ticks "Ask me questions again".</td></tr>
     <tr><td>One storyboard at a time</td><td>A team can't start a second drawing while one is being made.</td></tr>
     <tr><td>Submit and resubmit</td><td>Teams pick one storyboard and submit it. They can switch to a different one until you start voting. Whatever is submitted at that moment gets rated. A team that never submits isn't rated.</td></tr>
@@ -237,7 +237,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
     <h3>You start the design phase</h3>
     <div class="roles">
       <div class="role you"><span class="who">You</span>Controls → check the timer (8:00) → <span class="btn">Start designing</span>.</div>
-      <div class="role"><span class="who">Phone</span>Switches to the design form, with the countdown and the budget bar in the header.</div>
+      <div class="role"><span class="who">Phone</span>Switches to the design form, with the countdown and the credits bar in the header.</div>
       <div class="role"><span class="who">Projector</span>"Design your level", the big countdown, "Use all four: Level Enemy Ability Puzzle", a tile per team, and "N of M submitted".</div>
     </div>
     <div class="shots w2">
@@ -270,7 +270,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
 
   <div class="step"><div class="num">5</div><div>
     <h3>Generate → the AI asks follow-up questions</h3>
-    <p>The sticky button at the bottom reads <span class="btn">Next: questions, then draw</span> and shows the most this attempt can cost ("up to $..."; the real cost is usually well under that). The AI reads the design (and any reference images) and asks <b>0-3 short questions</b> about whatever is unclear. Each has an answer field and <span class="btn paperbtn">Skip</span>. Then <span class="btn">Draw it</span>. "Never mind, back to editing" cancels.</p>
+    <p>The sticky button at the bottom reads <span class="btn">Next: questions, then draw</span> and shows the most this attempt can use ("up to N credits"; the real cost is usually well under that). The AI reads the design (and any reference images) and asks <b>0-3 short questions</b> about whatever is unclear. Each has an answer field and <span class="btn paperbtn">Skip</span>. Then <span class="btn">Draw it</span>. "Never mind, back to editing" cancels.</p>
     <div class="shots w3">
       <figure class="phone"><a href="img/16-team-asking-phone.jpg" target="_blank"><img src="img/16-team-asking-phone.jpg" alt=""></a><figcaption><b>"The artist is reading"</b>: the drawing-machine animation and an elapsed-time counter</figcaption></figure>
       <figure class="phone"><a href="img/17-team-questions-phone.jpg" target="_blank"><img src="img/17-team-questions-phone.jpg" alt=""></a><figcaption><b>3 quick questions</b>: one line each, skip anything</figcaption></figure>
@@ -299,7 +299,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
 
   <div class="step"><div class="num">7</div><div>
     <h3>Iterate: redraw, compare versions, resubmit</h3>
-    <p>Teams can edit any field and press <span class="btn">Redraw storyboard</span> as often as the budget allows. Redraws skip the questions unless "Ask me questions again" is ticked. Tapping a version in History reopens it, and "Edit from this version" loads its text back into the form. To change the submission, open another version and press <span class="btn">Submit this one instead</span>.</p>
+    <p>Teams can edit any field and press <span class="btn">Redraw storyboard</span> as often as their credits allow. Redraws skip the questions unless "Ask me questions again" is ticked. Tapping a version in History reopens it, and "Edit from this version" loads its text back into the form. To change the submission, open another version and press <span class="btn">Submit this one instead</span>.</p>
     <p>If the team has storyboards but hasn't submitted, a <b>"Not submitted yet"</b> banner with a Submit button stays in the sticky bar, and it pulses amber in the last 60 seconds.</p>
     <div class="shots w3">
       <figure class="phone"><a href="img/24-team-result-v2-changes-full-phone.jpg" target="_blank"><img src="img/24-team-result-v2-changes-full-phone.jpg" alt=""></a><figcaption><b>Version 2</b> with "What we changed" (something was softened)</figcaption></figure>
@@ -311,7 +311,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <div class="step"><div class="num">8</div><div>
     <h3>Meanwhile, on your screens</h3>
     <div class="roles">
-      <div class="role you"><span class="who">Admin · Teams tab</span>A row per team with its status (drafting, asking, generating, submitted), online or last seen, spend and budget, number of storyboards, a submitted thumbnail, and <span class="btn paperbtn">View</span> / <span class="btn ghost">Reset budget</span>.</div>
+      <div class="role you"><span class="who">Admin · Teams tab</span>A row per team with its status (drafting, asking, generating, submitted), online or last seen, credits used, number of storyboards, a submitted thumbnail, and <span class="btn paperbtn">View</span> / <span class="btn ghost">Reset credits</span>.</div>
       <div class="role you"><span class="who">Admin · Feed tab</span>A live list: joined, renamed, asked, drew, refused, submitted, voted. Filter chips (All, Generations, Problems, Joins, Submits/votes, Admin).</div>
       <div class="role"><span class="who">Projector</span>Tiles show "SUBMITTED" and the storyboard count, but no pictures (so teams can't copy each other). The last 10 seconds show a giant pulsing countdown, then "Time is up. Submit what you have!".</div>
     </div>
@@ -431,7 +431,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
     <tr><th>Situation</th><th>What the team sees</th><th>Cost</th><th>What to do</th></tr>
     <tr><td><b>Design text flagged</b> (clearly inappropriate words, caught before any AI drawing)</td><td>"The safety filter stopped this one", with advice to reword</td><td>Free</td><td>Nothing; they reword. It shows under "Problems" in the Feed.</td></tr>
     <tr><td><b>Image refused</b> by the image model (often a lookalike of a famous cartoon character; one automatic retry happens first)</td><td>"The artist wouldn't draw this version", with tips (describe characters in your own words; horror is fine, gore should be implied)</td><td>Charged (~$0.01-0.06)</td><td>Suggest describing the character as an original design.</td></tr>
-    <tr><td><b>Out of budget</b></td><td>"Out of budget for new drawings". They can still submit any storyboard they've made.</td><td>-</td><td>Teams tab → <span class="btn ghost">Reset budget</span> on that team (spend back to $0, work kept).</td></tr>
+    <tr><td><b>Out of credits</b></td><td>"Out of credits for new drawings". They can still submit any storyboard they've made.</td><td>-</td><td>Teams tab → <span class="btn ghost">Reset credits</span> on that team (back to 500 credits, work kept).</td></tr>
     <tr><td><b>The class OpenAI cap ($50/month) is hit</b></td><td>"The class AI budget has run out. Tell the presenter."</td><td>-</td><td>Very unlikely (a full class is ~$5-15). Raise the limit on platform.openai.com or switch to the paper fallback.</td></tr>
     <tr><td><b>Phone loses Wi-Fi</b></td><td>A "Reconnecting" pill; it catches up when back</td><td>-</td><td>Nothing. The draft is saved on the phone.</td></tr>
     <tr><td><b>Someone opens /screen without admin</b></td><td>"Log in at /admin in this browser first"</td><td>-</td><td>Log in to admin in that browser.</td></tr>
@@ -440,7 +440,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <div class="shots w5">
     <figure class="phone"><a href="img/26-team-flagged-phone.jpg" target="_blank"><img src="img/26-team-flagged-phone.jpg" alt=""></a><figcaption><b>Flagged</b></figcaption></figure>
     <figure class="phone"><a href="img/25-team-refused-phone.jpg" target="_blank"><img src="img/25-team-refused-phone.jpg" alt=""></a><figcaption><b>Refused</b></figcaption></figure>
-    <figure class="phone"><a href="img/27-team-out-of-budget-phone.jpg" target="_blank"><img src="img/27-team-out-of-budget-phone.jpg" alt=""></a><figcaption><b>Out of budget</b></figcaption></figure>
+    <figure class="phone"><a href="img/27-team-out-of-budget-phone.jpg" target="_blank"><img src="img/27-team-out-of-budget-phone.jpg" alt=""></a><figcaption><b>Out of credits</b> (older screenshot, still says budget)</figcaption></figure>
     <figure class="phone"><a href="img/62-team-reconnecting-phone.jpg" target="_blank"><img src="img/62-team-reconnecting-phone.jpg" alt=""></a><figcaption><b>Reconnecting</b></figcaption></figure>
     <figure class="phone"><a href="img/61-team-session-expired-phone.jpg" target="_blank"><img src="img/61-team-session-expired-phone.jpg" alt=""></a><figcaption><b>Signed out after reset</b></figcaption></figure>
   </div>
@@ -470,7 +470,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
     <tr><td><b>Teams</b></td><td>
       <ul>
         <li><b>Stats</b>: teams joined of 12 code cards, online now, submitted, storyboards, team spend.</li>
-        <li><b>A row per team that has joined</b> (unused codes never appear): number, name, activity, seen, spend/budget bar, generations, submitted thumbnail, then <span class="btn paperbtn">View</span> (the drawer with all its storyboards and details) and <span class="btn ghost">Reset budget</span>.</li>
+        <li><b>A row per team that has joined</b> (unused codes never appear): number, name, activity, seen, credits bar, generations, submitted thumbnail, then <span class="btn paperbtn">View</span> (the drawer with all its storyboards and details) and <span class="btn ghost">Reset credits</span>.</li>
         <li>During voting each row also shows "rated x/y".</li>
       </ul></td></tr>
     <tr><td><b>Feed</b></td><td>The live event log, newest first, with thumbnails for storyboards and filters. The tab badge counts events you haven't seen.</td></tr>
@@ -499,7 +499,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
           <li>Change something, Redraw, then Submit this one instead.</li>
         </ul></li>
       <li><b>Play the other two quickly.</b> Generate and submit each. Optionally leave one unsubmitted for a bit to see the amber "Not submitted yet" banner.</li>
-      <li><b>Watch the admin tab.</b> Feed fills up, the Teams tab shows spend, View opens a team's history. Try <b>+1:00</b> and watch the projector and phones follow, then <b>Reset budget</b> on one team.</li>
+      <li><b>Watch the admin tab.</b> Feed fills up, the Teams tab shows credits used, View opens a team's history. Try <b>+1:00</b> and watch the projector and phones follow, then <b>Reset credits</b> on one team.</li>
       <li><b>Start voting.</b> On each team, rate the 2 designs it's given and press All done. The projector shows "3 of 3 teams done".</li>
       <li><b>Go to the podium.</b> Press Reveal 3rd place, 2nd place, the winner. Try <b>Undo one step</b> once and reveal again. Check the phones: "look up", then each team's place.</li>
       <li><b>End and show the gallery.</b> The projector shows "Thanks for playing".</li>
@@ -514,7 +514,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <h2>Reset, costs and the fallback</h2>
   <div class="grid3">
     <div class="card"><span class="who">Reset event</span><h3>Wipes everything</h3><p>All teams, storyboards, uploads, votes and spend are deleted, and every phone is signed out. Your admin session stays. The codes on the cards keep working, so you can reuse the same cards.</p></div>
-    <div class="card"><span class="who">Costs</span><h3>Small</h3><p>About $0.04-0.06 per storyboard. A team's $5 covers roughly 80-100 draws. Building and testing the site used about $3 of the $50 monthly OpenAI cap. A full class should cost $5-15.</p></div>
+    <div class="card"><span class="who">Costs</span><h3>Small</h3><p>About $0.04-0.06 (4-6 credits) per storyboard. A team's 500 credits cover roughly 80-100 draws. Building and testing the site used about $3 of the $50 monthly OpenAI cap. A full class should cost $5-15.</p></div>
     <div class="card"><span class="who">Fallback</span><h3>Paper cards</h3><p>If the site or Wi-Fi fails: use the small paper attendance cards. Each team writes or draws its level, a few present, and the class votes by show of hands.</p></div>
   </div>
 </div></section>

@@ -9,6 +9,7 @@ import { q1 } from "@/lib/server/db";
 import { reserveForAnswers } from "@/lib/server/budget";
 import { generationView } from "@/lib/server/views";
 import { runGeneration, withDeadline, MSG } from "@/lib/server/pipeline";
+import { creditsLabel } from "@/lib/credits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,7 +48,7 @@ export const POST = route(async (req: Request, ctx: { params: Promise<{ id: stri
     );
     if (now?.status !== "questions") throw new ApiErr("conflict", "This generation isn't waiting for answers any more.");
     const left = Math.max(0, Number(now.budget_usd) - Number(now.spend_usd) - Number(now.reserved_usd));
-    throw new ApiErr("budget", `Not enough budget left to draw this ($${left.toFixed(2)} left, about $${est.toFixed(2)} needed).`);
+    throw new ApiErr("budget", `Not enough credits left to draw this (${creditsLabel(left)} left, up to ${creditsLabel(est)} needed).`);
   }
 
   const input: DesignInput = { ...(gen.inputs as DesignFields), references: refs };

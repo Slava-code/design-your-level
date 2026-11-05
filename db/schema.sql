@@ -104,3 +104,16 @@ CREATE TABLE IF NOT EXISTS join_attempts (
   ts              timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS join_attempts_ip_ts_idx ON join_attempts (ip, kind, ts);
+
+-- Added 2026-11-05: per-call cost breakdown for each generation (followup / prompt / image,
+-- each {usd, ...token counts}), so spend can be audited after the fact.
+ALTER TABLE generations ADD COLUMN IF NOT EXISTS cost_detail jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+-- Added 2026-11-05: Reset event saves a full JSON snapshot of the event here before wiping it,
+-- so logs (teams, generations, feed, votes) survive a reset. Images are still deleted from Blob.
+CREATE TABLE IF NOT EXISTS event_archive (
+  id              bigserial PRIMARY KEY,
+  archived_at     timestamptz NOT NULL DEFAULT now(),
+  epoch           int NOT NULL,
+  snapshot        jsonb NOT NULL
+);

@@ -55,6 +55,7 @@ export function generationAdminView(g: Row, submittedId: string | null): Generat
     modelText: g.model_text ?? null,
     modelImage: g.model_image ?? null,
     errorDetail: g.error_detail ?? null,
+    costDetail: (g.cost_detail && typeof g.cost_detail === "object" ? g.cost_detail : {}) as Record<string, Record<string, number | null>>,
   };
 }
 

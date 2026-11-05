@@ -13,7 +13,7 @@ import {
   type TeamState,
 } from "@/lib/types";
 import { Button, ConfirmDialog, Tabs, useToast, cx } from "@/components/ui";
-import { post, usd } from "./api";
+import { post, cr } from "./api";
 import { FIELD_LABEL, missingFields, useDraft, type DraftRef } from "./draft";
 import { uploadReference, ImagePrepError } from "./images";
 import { DesignForm, type Upload } from "./DesignForm";
@@ -214,7 +214,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
       toast.show(r.error.error, { tone: "warn" });
       setTab("board");
     } else if (code === "budget") {
-      toast.error(r.error.error, { title: "Out of budget", durationMs: 9000 });
+      toast.error(r.error.error, { title: "Out of credits", durationMs: 9000 });
     } else if (code === "bad_request" && /uploaded|Reference/i.test(r.error.error)) {
       toast.error(r.error.error, { title: "Image problem" });
     } else {
@@ -348,7 +348,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
               )}
               {outOfBudget && !inFlight ? (
                 <p className={s.outOfBudget} role="status">
-                  Out of budget for new drawings ({usd(team.remainingUsd)} left).
+                  Out of credits for new drawings ({cr(team.remainingUsd)} left).
                   {doneCount > 0 ? " You can still submit any storyboard you made." : " Ask the presenter for help."}
                 </p>
               ) : null}
@@ -377,7 +377,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
                 ) : (
                   <span className={s.genNote}>You can keep editing while it works.</span>
                 )}
-                <span className={s.cost}>up to {usd(estimate)}</span>
+                <span className={s.cost}>up to {cr(estimate)}</span>
               </div>
             </div>
           </div>

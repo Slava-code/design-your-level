@@ -226,9 +226,24 @@ export async function moveReveal(action: unknown, fromStep?: unknown): Promise<R
   return revealState({ ...ev, reveal_step: step })!;
 }
 
-/** Wipe everything, bump the epoch (logs everyone out) and delete this namespace's old Blob files. */
+/** Wipe everything, bump the epoch (logs everyone out) and delete this namespace's old Blob files.
+ *  First saves a JSON snapshot of the whole event into event_archive (same transaction), so the logs
+ *  survive the reset. Skipped when there is nothing to save. */
 export async function resetEvent(): Promise<{ epoch: number; blobsDeleted: number; blobError?: string }> {
   const results = await batch([
+    [
+      `INSERT INTO event_archive (epoch, snapshot)
+       SELECT e.epoch, jsonb_build_object(
+                'event', to_jsonb(e),
+                'teams', COALESCE((SELECT jsonb_agg(to_jsonb(t) ORDER BY t.slot) FROM teams t), '[]'::jsonb),
+                'generations', COALESCE((SELECT jsonb_agg(to_jsonb(g) ORDER BY g.created_at) FROM generations g), '[]'::jsonb),
+                'feed', COALESCE((SELECT jsonb_agg(to_jsonb(f) ORDER BY f.id) FROM feed f), '[]'::jsonb),
+                'assignments', COALESCE((SELECT jsonb_agg(to_jsonb(a)) FROM assignments a), '[]'::jsonb),
+                'votes', COALESCE((SELECT jsonb_agg(to_jsonb(v)) FROM votes v), '[]'::jsonb))
+         FROM event_state e
+        WHERE e.id = 1 AND (EXISTS (SELECT 1 FROM teams) OR EXISTS (SELECT 1 FROM feed))`,
+      [],
+    ],
     ["DELETE FROM votes", []],
     ["DELETE FROM assignments", []],
     ["DELETE FROM generations", []],
@@ -242,7 +257,7 @@ export async function resetEvent(): Promise<{ epoch: number; blobsDeleted: numbe
       [],
     ],
   ]);
-  const epoch = Number(results[6][0].epoch);
+  const epoch = Number(results[7][0].epoch);
   let blobsDeleted = 0;
   let blobError: string | undefined;
   try {

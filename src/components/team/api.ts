@@ -1,3 +1,4 @@
+import { creditsLabel, toCredits } from "@/lib/credits";
 // Tiny typed fetch helpers for the team client. Never throws: returns {ok, data} or {ok:false, error}.
 import type { ApiError, ErrorCode } from "@/lib/types";
 
@@ -49,3 +50,5 @@ function codeFor(status: number): ErrorCode {
 }
 
 export const usd = (n: number) => `$${(Math.round(n * 100) / 100).toFixed(2)}`;
+/** Team-facing cost: whole credits (1 credit = $0.01); tiny non-zero costs read "under 1 credit". */
+export const cr = (n: number) => (n > 0 && toCredits(n) === 0 ? "under 1 credit" : creditsLabel(n));

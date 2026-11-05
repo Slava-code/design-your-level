@@ -58,7 +58,7 @@ export async function withDeadline(startedAt: number, id: string, slot: number, 
 export async function runFollowups(id: string, slot: number, epoch: number, design: DesignInput, followupEst: number): Promise<void> {
   try {
     const r = await askFollowups(design);
-    await charge(id, r.cost?.usd ?? 0);
+    await charge(id, r.cost?.usd ?? 0, "followup", r.cost?.detail, r.ms);
     const questions = (Array.isArray(r.questions) ? r.questions : [])
       .map((x) => String(x ?? "").trim())
       .filter(Boolean)
@@ -84,7 +84,7 @@ export async function runFollowups(id: string, slot: number, epoch: number, desi
 export async function runGeneration(id: string, slot: number, epoch: number, design: DesignInput, qa: QA[]): Promise<void> {
   try {
     const p = await writeImagePrompt(design, qa);
-    await charge(id, p.cost?.usd ?? 0);
+    await charge(id, p.cost?.usd ?? 0, "prompt", p.cost?.detail, p.ms);
     const still = await q1(
       `UPDATE generations SET image_prompt = $2, panel_captions = $3::jsonb, reference_roles = $4::jsonb, changes_made = $5::jsonb,
               ms_text = COALESCE(ms_text, 0) + COALESCE($6, 0), updated_at = now()
@@ -94,7 +94,7 @@ export async function runGeneration(id: string, slot: number, epoch: number, des
     if (!still) return; // swept or cancelled meanwhile: don't spend on the image
 
     const s = await generateStoryboard(p.imagePrompt, design.references);
-    await charge(id, s.cost?.usd ?? 0);
+    await charge(id, s.cost?.usd ?? 0, "image", s.cost?.detail, s.ms);
     if (s.ok) {
       const url = await putGeneratedImage(epoch, slot, id, s.bytes, s.contentType);
       const row = await finish(id, ["generating"], "done", { imageUrl: url, msImage: ms(s.ms) });

@@ -13,6 +13,7 @@ import { logFeed } from "@/lib/server/feed";
 import { generationView } from "@/lib/server/views";
 import { runFollowups, runGeneration, withDeadline, MSG } from "@/lib/server/pipeline";
 import { newId } from "@/lib/server/ids";
+import { creditsLabel } from "@/lib/credits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,7 +79,7 @@ export const POST = route(async (req: Request) => {
     const left = Math.max(0, Number(t.budget_usd) - Number(t.spend_usd) - Number(t.reserved_usd));
     throw new ApiErr(
       "budget",
-      `Not enough budget left for another generation ($${left.toFixed(2)} left, about $${est.toFixed(2)} needed). Submit your best one, or ask the presenter.`,
+      `Not enough credits left for another drawing (${creditsLabel(left)} left, up to ${creditsLabel(est)} needed). Submit your best one, or ask the presenter.`,
     );
   }
 
