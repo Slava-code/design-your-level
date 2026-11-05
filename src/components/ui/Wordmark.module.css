@@ -1,0 +1,102 @@
+.mark {
+  --u: 1rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--u) * 0.1);
+  line-height: 1;
+  user-select: none;
+}
+.sm { --u: 0.75rem; }
+.md { --u: 1.25rem; }
+.lg { --u: clamp(1.25rem, 0.8rem + 2.6vw, 2.6rem); }
+.hero { --u: clamp(1.5rem, 0.4rem + 5.2vw, 6.5rem); }
+
+.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: calc(var(--u) * 0.5);
+}
+
+.kicker {
+  font-family: var(--font-grotesk);
+  font-weight: 600;
+  font-size: max(11px, calc(var(--u) * 0.34));
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--phos-mid);
+  margin-bottom: calc(var(--u) * 0.25);
+}
+.inline .kicker { display: none; }
+
+.design {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--font-terminal);
+  font-size: calc(var(--u) * 2.3);
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  color: var(--phos);
+  text-shadow: 0 0 0.18em rgba(124, 255, 155, 0.75), 0 0 0.6em rgba(124, 255, 155, 0.35);
+  padding-left: calc(var(--u) * 0.05);
+}
+.prompt {
+  color: var(--phos-dim);
+  margin-right: 0.18em;
+  text-shadow: none;
+}
+.caret {
+  display: inline-block;
+  width: 0.42em;
+  height: 0.62em;
+  margin-left: 0.08em;
+  background: var(--phos);
+  box-shadow: 0 0 0.25em rgba(124, 255, 155, 0.8);
+  animation: blink 1.05s steps(1) infinite;
+  align-self: center;
+}
+
+.level {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: calc(var(--u) * 2.6);
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+  white-space: nowrap;
+  color: var(--ink);
+  padding: 0.08em 0.28em 0.14em;
+  background-color: var(--parch);
+  background-image: var(--grain), linear-gradient(170deg, #f6ecd2, #dcc596);
+  background-size: 160px 160px, cover;
+  border-radius: calc(var(--u) * 0.18);
+  transform: rotate(-2.5deg);
+  box-shadow: 0 calc(var(--u) * 0.22) 0 var(--sepia), 0 calc(var(--u) * 0.32) calc(var(--u) * 0.6) rgba(0, 0, 0, 0.5);
+  margin-left: calc(var(--u) * 0.6);
+}
+.inline .level { margin-left: 0; }
+.your {
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 0.62em;
+  letter-spacing: 0;
+  color: var(--sepia-text);
+  vertical-align: 0.18em;
+  margin-right: -0.04em;
+}
+/* ink drip off the sticker */
+.level::after {
+  content: "";
+  position: absolute;
+  right: 18%;
+  bottom: calc(var(--u) * -0.62);
+  width: calc(var(--u) * 0.22);
+  height: calc(var(--u) * 0.62);
+  border-radius: 0 0 999px 999px;
+  background: var(--ink);
+}
+
+.animate .design { animation: rise-in 500ms var(--ease-out) both; }
+.animate .level { animation: slam 750ms var(--ease-out) 220ms both; }

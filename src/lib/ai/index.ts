@@ -28,10 +28,10 @@ export type StoryboardResult =
   | { ok: true; bytes: Uint8Array; contentType: string; cost: AiCost; ms: number }
   | { ok: false; refused: boolean; reason: string; cost: AiCost; ms: number };
 
-export const MODELS = {
-  text: process.env.TEXT_MODEL || "gpt-6-luna",
-  image: process.env.IMAGE_MODEL || "gpt-image-2.6-flare",
-};
+// Model defaults (TEXT_MODEL / IMAGE_MODEL env overrides) live in ./config with the other AI settings.
+export { MODELS } from "./config";
+import { IMAGE_SETTINGS } from "./config";
+import { imageUpperUsd, textUpperUsd } from "./pricing";
 
 export const isMock = () => process.env.MOCK_AI === "1";
 
@@ -81,20 +81,34 @@ export async function generateStoryboard(imagePrompt: string, refs: RefImage[]):
   if (isMock()) {
     await sleep(mockDelay() * 2);
     if (imagePrompt.includes("MOCK_REFUSE")) {
-      return { ok: false, refused: true, reason: "Mock refusal", cost: { usd: 0.01, detail: { mock: 0.01 } }, ms: mockDelay() * 2 };
+      return { ok: false, refused: true, reason: "(mock) The image filter blocked this one. Describe your characters in more of your own words and try again.", cost: { usd: 0.01, detail: { mock: 0.01 } }, ms: mockDelay() * 2 };
     }
     return { ok: true, bytes: new TextEncoder().encode(mockSvg(imagePrompt)), contentType: "image/svg+xml", cost: zero, ms: mockDelay() * 2 };
   }
   return (await import("./openai")).generateStoryboard(imagePrompt, refs);
 }
 
-/** Conservative upper bound reserved against a team's budget before a generation starts. */
-export function estimateGenerationUsd(nRefs: number): number {
-  return 0.6 + 0.05 * nRefs; // placeholder until spike/RESULTS.md measures real costs
+/** Team-facing message for an error thrown by askFollowups / writeImagePrompt / generateStoryboard
+ *  (quota hit, rate limited, key rejected, service down), or null for anything else. */
+export async function friendlyAiError(e: unknown): Promise<{ message: string; quota: boolean } | null> {
+  if (isMock() || e == null || typeof e !== "object") return null;
+  const ai = await import("./openai");
+  const message = ai.friendlyAiError(e);
+  return message ? { message, quota: ai.isQuotaError(e) } : null;
 }
 
+/** Conservative upper bound reserved against a team's budget before a generation starts: prompt-writer call
+ *  + image call + the worst case of one output-stage refusal (charged as a full image) and its automatic retry.
+ *  Measured normal path: $0.044 with no refs, $0.093 with 4 refs (flare, high). */
+export function estimateGenerationUsd(nRefs: number): number {
+  const image = imageUpperUsd(IMAGE_SETTINGS.quality, nRefs);
+  const refusal = imageUpperUsd(IMAGE_SETTINGS.quality, 0);
+  return Math.round((textUpperUsd(nRefs) + image + refusal) * 1e4) / 1e4;
+}
+
+/** Upper bound for the follow-up questions call. Measured: $0.0001-$0.0007. */
 export function estimateFollowupUsd(nRefs: number): number {
-  return 0.02 + 0.005 * nRefs;
+  return textUpperUsd(nRefs);
 }
 
 function mockSvg(prompt: string): string {

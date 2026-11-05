@@ -1,49 +1,740 @@
+/* ==========================================================================
+   Design Your Level: global design system
+   "Phosphor and Ink" (terminal side vs. parchment side) with party-game energy.
+
+   Conventions
+   - Components read SEMANTIC tokens (--bg, --surface, --text, --accent ...).
+   - Wrap any region in .surface-terminal or .surface-paper to flip the
+     semantic tokens; every ui/ component adapts automatically.
+   - Raw palette tokens (--phos, --ink, --parch ...) are for art direction.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ---- palette (from the deck) ---- */
+  --phos: #7cff9b;
+  --phos-bright: #c4ffd2;
+  --phos-mid: #4fd774;
+  --phos-dim: #2f7a45;
+  --phos-deep: #0f2a19;
+  --phos-black: #06140b;
+  --phos-void: #030a06;
+  --parch: #e9dcbc;
+  --parch-deep: #d9c79c;
+  --paper: #f6eedb;
+  --sepia: #a67c4e;
+  --sepia-light: #cda676;
+  --sepia-text: #6b4a28;
+  --ink: #1a120a;
+  --ink-soft: #3a2a1a;
+  --charcoal: #141417;
+  --bone: #f4f1ea;
+  --body: #d8d6d0;
+  --muted: #9c9a93;
+  /* party accents (kept warm / phosphor-adjacent) */
+  --blood: #ff5a4e;
+  --blood-deep: #8f1d16;
+  --amber: #ffc857;
+  --amber-deep: #8a5a00;
+  --cyan: #8fe3ff;
+
+  /* the four design aspects (use for tags, score rows, field accents) */
+  --aspect-level: #e8b05c;
+  --aspect-enemy: #ff6b5b;
+  --aspect-ability: #7cff9b;
+  --aspect-puzzle: #8fd3ff;
+
+  /* ---- font roles (raw --ff-* vars come from next/font in layout.tsx) ---- */
+  --font-body: var(--ff-plex), system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--ff-bricolage), "Arial Black", Arial, sans-serif;
+  --font-terminal: var(--ff-vt323), ui-monospace, Menlo, monospace;
+  --font-type: var(--ff-special-elite), "Courier New", monospace;
+  --font-serif: var(--ff-dm-serif), Georgia, serif;
+  --font-marquee: var(--ff-limelight), Georgia, serif;
+  --font-hand: var(--ff-caveat), "Comic Sans MS", cursive;
+  --font-grotesk: var(--ff-space), system-ui, sans-serif;
+
+  /* ---- fluid type scale (320px phone -> 4K projector) ---- */
+  --fs-xs: clamp(0.75rem, 0.72rem + 0.12vw, 0.85rem);
+  --fs-sm: clamp(0.875rem, 0.84rem + 0.15vw, 1rem);
+  --fs-md: clamp(1rem, 0.96rem + 0.2vw, 1.15rem);
+  --fs-lg: clamp(1.2rem, 1.1rem + 0.45vw, 1.5rem);
+  --fs-xl: clamp(1.5rem, 1.3rem + 0.9vw, 2.1rem);
+  --fs-2xl: clamp(1.9rem, 1.5rem + 1.8vw, 3.2rem);
+  --fs-3xl: clamp(2.4rem, 1.8rem + 3vw, 4.8rem);
+  --fs-hero: clamp(3rem, 2rem + 5.5vw, 8rem);
+  --fs-giant: clamp(5rem, 2rem + 18vw, 26rem);
+
+  /* ---- spacing ---- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.25rem;
+  --s-6: 1.5rem;
+  --s-7: 2rem;
+  --s-8: 2.5rem;
+  --s-9: 3rem;
+  --s-10: 4rem;
+  --s-11: 6rem;
+
+  /* ---- radii ---- */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* ---- motion ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-snap: cubic-bezier(0.5, 0, 0.2, 1.4);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --dur-slow: 480ms;
+
+  /* ---- z layers ---- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-overlay: 1000;
+  --z-dialog: 1100;
+  --z-toast: 1200;
+  --z-confetti: 1300;
+
+  /* ---- tap targets ---- */
+  --tap: 48px;
+  --tap-lg: 60px;
+
+  /* ---- glows / shadows ---- */
+  --glow-phos: 0 0 0.5em rgba(124, 255, 155, 0.55), 0 0 1.6em rgba(124, 255, 155, 0.25);
+  --glow-phos-box: 0 0 0 1px rgba(124, 255, 155, 0.45), 0 0 24px rgba(124, 255, 155, 0.18),
+    inset 0 0 24px rgba(124, 255, 155, 0.06);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-sticker: 0 6px 0 rgba(0, 0, 0, 0.55);
+
+  /* ---- art (with gradient fallbacks: missing images just show the gradient) ---- */
+  --art-phosphor: url("/art/bg-phosphor.jpg");
+  --art-parchment: url("/art/bg-parchment.jpg");
+  --art-hero: url("/art/hero-split.jpg");
+  --art-projector: url("/art/projector-bg.jpg");
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.07  0 0 0 0 0.04  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---- semantic tokens: terminal (default) ---- */
+:root,
+.surface-terminal {
+  --bg: var(--phos-black);
+  --bg-elev: #0a1d11;
+  --surface: rgba(10, 32, 19, 0.82);
+  --surface-2: rgba(124, 255, 155, 0.07);
+  --surface-solid: #0b2214;
+  --text: #dff5e5;
+  --text-strong: var(--bone);
+  --text-muted: #8fb79a;
+  --accent: var(--phos);
+  --accent-strong: var(--phos-bright);
+  --accent-ink: var(--phos-black);
+  --accent-shade: var(--phos-dim);
+  --line: rgba(124, 255, 155, 0.22);
+  --line-strong: rgba(124, 255, 155, 0.55);
+  --danger: var(--blood);
+  --danger-ink: #1a0503;
+  --danger-shade: var(--blood-deep);
+  --ok: var(--phos);
+  --warn: var(--amber);
+  --focus: var(--amber);
+  --field-bg: rgba(3, 12, 7, 0.75);
+  --field-text: var(--bone);
+  --placeholder: rgba(143, 183, 154, 0.7);
+  --chip-bg: rgba(124, 255, 155, 0.08);
+  --chip-text: var(--phos);
+  --chip-line: rgba(124, 255, 155, 0.35);
+  --label-font: var(--font-terminal);
+  --heading-font: var(--font-display);
+  --heading-color: var(--phos);
+  color-scheme: dark;
 }
 
-html {
-  height: 100%;
+/* ---- semantic tokens: parchment / ink ---- */
+.surface-paper {
+  --bg: var(--parch);
+  --bg-elev: var(--paper);
+  --surface: rgba(246, 238, 219, 0.9);
+  --surface-2: rgba(26, 18, 10, 0.06);
+  --surface-solid: var(--paper);
+  --text: var(--ink);
+  --text-strong: #0d0904;
+  --text-muted: var(--sepia-text);
+  --accent: var(--ink);
+  --accent-strong: #000;
+  --accent-ink: var(--parch);
+  --accent-shade: #000;
+  --line: rgba(26, 18, 10, 0.2);
+  --line-strong: rgba(26, 18, 10, 0.55);
+  --danger: #b3261e;
+  --danger-ink: #fff4ef;
+  --danger-shade: #5e0f0a;
+  --ok: #1f6b38;
+  --warn: #8a5a00;
+  --focus: #b3261e;
+  --field-bg: rgba(255, 252, 243, 0.85);
+  --field-text: var(--ink);
+  --placeholder: rgba(107, 74, 40, 0.65);
+  --chip-bg: rgba(166, 124, 78, 0.14);
+  --chip-text: var(--ink-soft);
+  --chip-line: rgba(107, 74, 40, 0.4);
+  --label-font: var(--font-type);
+  --heading-font: var(--font-display);
+  --heading-color: var(--ink);
+  color-scheme: light;
+  color: var(--text);
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+.surface-terminal {
+  color: var(--text);
 }
 
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--phos-void);
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  isolation: isolate; /* keeps the body::before art layer above body's own background */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--text);
+  background:
+    radial-gradient(120% 70% at 15% 0%, rgba(47, 122, 69, 0.38), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(166, 124, 78, 0.16), transparent 60%),
+    var(--phos-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Default page art layer (art worker's bg-phosphor.jpg), very dim so text stays readable. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(110% 65% at 12% 0%, rgba(60, 160, 90, 0.32), transparent 62%),
+    radial-gradient(80% 60% at 100% 100%, rgba(166, 124, 78, 0.18), transparent 62%),
+    linear-gradient(180deg, rgba(6, 20, 11, 0.45), rgba(6, 20, 11, 0.82)),
+    var(--art-phosphor) center / cover no-repeat;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+  color: var(--accent);
+  text-underline-offset: 0.18em;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--heading-font);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-3xl);
+}
+h2 {
+  font-size: var(--fs-2xl);
+}
+h3 {
+  font-size: var(--fs-xl);
+}
+h4 {
+  font-size: var(--fs-lg);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ==========================================================================
+   Typography utilities
+   ========================================================================== */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+}
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.marquee {
+  font-family: var(--font-marquee);
+  font-weight: 400;
+}
+.vt {
+  font-family: var(--font-terminal);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.typewriter {
+  font-family: var(--font-type);
+}
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 600;
+}
+
+/* Small letterspaced uppercase label ("ACTIVITY", "01 / LEVEL"). */
+.kicker {
+  font-family: var(--font-grotesk);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.kicker.is-phos {
+  color: var(--phos-mid);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.glow-text {
+  color: var(--phos);
+  text-shadow: var(--glow-phos);
+}
+
+/* Deck signature: headline split across the seam (green left / ink right).
+   Override --split-l / --split-r / --split-at as needed. */
+.split-text {
+  display: inline-block;
+  --split-l: var(--phos);
+  --split-r: var(--parch);
+  --split-at: 50%;
+  background: linear-gradient(90deg, var(--split-l) 0 var(--split-at), var(--split-r) var(--split-at) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   Surface / texture utilities
+   ========================================================================== */
+
+/* CRT: scanlines + soft phosphor bloom. Put on a positioned container. */
+.crt {
+  position: relative;
+  isolation: isolate;
+}
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.28) 3px,
+      rgba(0, 0, 0, 0) 4px
+    ),
+    radial-gradient(120% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.45) 100%);
+  mix-blend-mode: multiply;
+}
+.crt-flicker {
+  animation: crt-flicker 6s steps(1) infinite;
+}
+
+/* Terminal-side page/area background, with art and gradient fallback. */
+.bg-phosphor {
+  background:
+    linear-gradient(180deg, rgba(6, 20, 11, 0.55), rgba(6, 20, 11, 0.85)),
+    var(--art-phosphor) center / cover no-repeat,
+    radial-gradient(100% 80% at 30% 10%, #12391f, var(--phos-black) 70%);
+}
+
+/* Projector background (/screen). */
+.bg-projector {
+  background:
+    linear-gradient(180deg, rgba(3, 10, 6, 0.35), rgba(3, 10, 6, 0.8)),
+    var(--art-projector) center / cover no-repeat,
+    radial-gradient(80% 60% at 50% 0%, rgba(47, 122, 69, 0.55), transparent 70%),
+    radial-gradient(70% 60% at 100% 100%, rgba(166, 124, 78, 0.35), transparent 70%),
+    var(--phos-void);
+}
+
+/* Split hero (phosphor left, parchment right). */
+.bg-hero-split {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.55)),
+    var(--art-hero) center / cover no-repeat,
+    linear-gradient(90deg, #0b2a16 0 50%, #b99a6a 50% 100%);
+}
+
+/* Ink-on-parchment block: aged paper with grain. Combine with .surface-paper. */
+.ink-paper {
+  background-color: var(--parch);
+  background-image:
+    var(--grain),
+    radial-gradient(130% 90% at 50% 40%, rgba(255, 250, 235, 0.35), rgba(120, 82, 40, 0.28) 100%),
+    var(--art-parchment);
+  background-size: 160px 160px, cover, cover;
+  background-position: center;
+  color: var(--ink);
+}
+
+/* Terminal glass block. Combine with .surface-terminal. */
+.terminal-glass {
+  background:
+    linear-gradient(180deg, rgba(124, 255, 155, 0.06), rgba(124, 255, 155, 0) 40%),
+    rgba(6, 22, 12, 0.88);
+  box-shadow: var(--glow-phos-box), var(--shadow-md);
+  border: 1px solid var(--line-strong);
+}
+
+/* Party "sticker": slight tilt + hard drop shadow. */
+.sticker {
+  display: inline-block;
+  transform: rotate(var(--tilt, -2deg));
+  box-shadow: var(--shadow-sticker);
+}
+
+/* ==========================================================================
+   Layout helpers
+   ========================================================================== */
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: max(var(--s-4), env(safe-area-inset-left));
+}
+.container-wide {
+  width: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  padding-inline: var(--s-6);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap, var(--s-4));
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap, var(--s-3));
+}
+.grid-auto {
+  display: grid;
+  gap: var(--gap, var(--s-4));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--min, 260px)), 1fr));
+}
+.center {
+  display: grid;
+  place-items: center;
+}
+
+/* ==========================================================================
+   Motion
+   ========================================================================== */
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-4deg);
+  }
+  40% {
+    transform: rotate(3.5deg);
+  }
+  60% {
+    transform: rotate(-2.5deg);
+  }
+  80% {
+    transform: rotate(1.5deg);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 14px currentColor);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-8px) rotate(var(--tilt, 0deg));
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift, 0), 110vh, 0) rotate(var(--spin, 720deg));
+    opacity: 0.9;
+  }
+}
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  41% {
+    opacity: 0.94;
+  }
+  42% {
+    opacity: 1;
+  }
+  77% {
+    opacity: 0.97;
+  }
+}
+@keyframes slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.4) rotate(-6deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(1deg);
+  }
+  75% {
+    transform: scale(1.04) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+.anim-pop-in {
+  animation: pop-in 520ms var(--ease-bounce) both;
+}
+.anim-rise-in {
+  animation: rise-in 520ms var(--ease-out) both;
+}
+.anim-wiggle {
+  animation: wiggle 700ms ease-in-out both;
+}
+.anim-wiggle-loop {
+  animation: wiggle 900ms ease-in-out infinite;
+}
+.anim-pulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+.anim-float {
+  animation: float 3.2s ease-in-out infinite;
+}
+.anim-blink {
+  animation: blink 1s steps(1) infinite;
+}
+.anim-slam {
+  animation: slam 700ms var(--ease-out) both;
+}
+.anim-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    rgba(124, 255, 155, 0.04) 20%,
+    rgba(124, 255, 155, 0.2) 50%,
+    rgba(124, 255, 155, 0.04) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+.surface-paper .anim-shimmer,
+.anim-shimmer.on-paper {
+  background-image: linear-gradient(
+    100deg,
+    rgba(26, 18, 10, 0.05) 20%,
+    rgba(26, 18, 10, 0.16) 50%,
+    rgba(26, 18, 10, 0.05) 80%
+  );
+}
+/* Stagger children of a list: set style={{"--i": n}} on each child. */
+.stagger > * {
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Blinking terminal cursor after text. */
+.cursor::after {
+  content: "_";
+  margin-left: 0.08em;
+  animation: blink 1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

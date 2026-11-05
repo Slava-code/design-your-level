@@ -1,0 +1,104 @@
+.group {
+  border: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.legend {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-lg);
+  color: var(--text-strong);
+  margin-bottom: var(--s-2);
+  padding: 0;
+}
+.hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin-top: calc(var(--s-2) * -1);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0.3em 1.05em;
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 2px solid var(--line-strong);
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--dur-fast) var(--ease-bounce), background var(--dur) ease, color var(--dur) ease,
+    border-color var(--dur) ease, box-shadow var(--dur) ease;
+}
+.chip:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.chip:active {
+  transform: scale(0.95);
+}
+.on {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 4px 0 var(--accent-shade), 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+  transform: translateY(-2px) rotate(-1.5deg);
+  animation: chipPop 360ms var(--ease-bounce);
+}
+.other .text::before {
+  content: "+ ";
+  font-family: var(--font-terminal);
+}
+.on.other .text::before {
+  content: "";
+}
+.radio {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.chip:has(.radio:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.group:disabled .chip {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.otherInput {
+  width: 100%;
+  max-width: 28rem;
+  min-height: var(--tap);
+  padding: 0.6em 0.85em;
+  font-size: max(16px, var(--fs-md));
+  color: var(--field-text);
+  background: var(--field-bg);
+  border: 2px solid var(--accent);
+  border-radius: var(--r-md);
+  animation: rise-in 260ms var(--ease-out);
+}
+.otherInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.otherInput::placeholder {
+  color: var(--placeholder);
+}
+@keyframes chipPop {
+  0% { transform: scale(0.9); }
+  60% { transform: translateY(-3px) rotate(-2deg) scale(1.06); }
+  100% { transform: translateY(-2px) rotate(-1.5deg); }
+}

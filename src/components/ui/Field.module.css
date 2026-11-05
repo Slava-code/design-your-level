@@ -1,0 +1,176 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.label {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-lg);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+}
+.req {
+  color: var(--danger);
+}
+
+.aspect {
+  --c: var(--accent);
+  align-self: center;
+  flex: none;
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 3px;
+  background: var(--c);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c) 60%, transparent);
+  transform: rotate(45deg);
+  margin-right: 0.1em;
+}
+.a-level { --c: var(--aspect-level); }
+.a-enemy { --c: var(--aspect-enemy); }
+.a-ability { --c: var(--aspect-ability); }
+.a-puzzle { --c: var(--aspect-puzzle); }
+:global(.surface-paper) .aspect { box-shadow: 0 0 0 2px var(--ink); }
+.field[data-aspect] .input {
+  border-left-width: 6px;
+}
+.field[data-aspect="level"] .input { border-left-color: var(--aspect-level); }
+.field[data-aspect="enemy"] .input { border-left-color: var(--aspect-enemy); }
+.field[data-aspect="ability"] .input { border-left-color: var(--aspect-ability); }
+.field[data-aspect="puzzle"] .input { border-left-color: var(--aspect-puzzle); }
+
+.hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin-top: -0.2em;
+}
+:global(.surface-paper) .hint {
+  font-family: var(--font-type);
+}
+
+.counter {
+  flex: none;
+  font-family: var(--font-terminal);
+  font-size: var(--fs-md);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.counterHot {
+  color: var(--warn);
+}
+
+.input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0.7em 0.85em;
+  font-family: var(--font-body);
+  font-size: max(16px, var(--fs-md)); /* >=16px prevents iOS zoom-on-focus */
+  line-height: 1.45;
+  color: var(--field-text);
+  background: var(--field-bg);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--r-md);
+  resize: vertical;
+  transition: border-color var(--dur) ease, box-shadow var(--dur) ease, background var(--dur) ease;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+textarea.input {
+  min-height: calc(var(--tap) * 1.8);
+}
+.input::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+:global(.surface-paper) .input::placeholder {
+  font-family: var(--font-type);
+}
+.input:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.input:focus-visible,
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent), inset 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+.input {
+  caret-color: var(--accent);
+}
+.big {
+  font-family: var(--font-terminal);
+  font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.4rem);
+  letter-spacing: 0.06em;
+  padding: 0.35em 0.6em;
+  text-align: center;
+}
+:global(.surface-paper) .input {
+  box-shadow: inset 0 2px 0 rgba(26, 18, 10, 0.08);
+}
+
+.hasError .input {
+  border-color: var(--danger);
+}
+.error {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--danger);
+}
+.disabled .input {
+  opacity: 0.6;
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+}
+.examplesLabel {
+  font-family: var(--label-font);
+  font-size: var(--fs-md);
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+:global(.surface-paper) .examplesLabel { font-size: var(--fs-sm); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: 40px;
+  padding: 0.25em 0.8em;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--chip-text);
+  background: var(--chip-bg);
+  border: 1.5px dashed var(--chip-line);
+  transition: transform var(--dur-fast) var(--ease-bounce), background var(--dur) ease, border-color var(--dur) ease;
+}
+.chip:hover:not(:disabled) {
+  border-style: solid;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  transform: translateY(-1px) rotate(-1deg);
+}
+.chip:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.plus {
+  font-family: var(--font-terminal);
+  font-size: 1.3em;
+  line-height: 1;
+}

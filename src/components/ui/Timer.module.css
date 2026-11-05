@@ -1,0 +1,72 @@
+.timer {
+  --c: var(--phos);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.85;
+  color: var(--c);
+  transition: color var(--dur) ease;
+}
+
+.digits {
+  display: block;
+  font-family: var(--font-terminal);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 0.12em color-mix(in srgb, var(--c) 80%, transparent), 0 0 0.45em color-mix(in srgb, var(--c) 35%, transparent);
+  font-size: 3rem;
+}
+
+.label {
+  font-family: var(--font-grotesk);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-top: 0.35em;
+}
+
+.sm .digits { font-size: 1.9rem; }
+.sm { flex-direction: row; gap: 0.5em; align-items: baseline; }
+.sm .label { margin-top: 0; }
+.md .digits { font-size: clamp(3rem, 2.4rem + 3vw, 4.5rem); }
+.lg .digits { font-size: clamp(4.5rem, 3rem + 6vw, 8rem); }
+.lg .label { font-size: var(--fs-md); }
+.giant .digits {
+  font-size: var(--fs-giant);
+  letter-spacing: 0;
+}
+.giant .label {
+  font-size: clamp(1rem, 0.6rem + 1.2vw, 2.2rem);
+  letter-spacing: 0.4em;
+  margin-top: 0.1em;
+}
+
+.empty { --c: var(--phos-dim); }
+.empty .digits { text-shadow: none; opacity: 0.8; }
+
+.hurry { --c: var(--amber); }
+.hurry .digits { animation: tick 1s var(--ease-bounce) both; }
+.critical { --c: var(--blood); }
+.critical .digits { animation: tickBig 1s var(--ease-bounce) both; }
+
+.expired { --c: var(--blood); }
+.expired .digits { animation: blink 0.8s steps(1) infinite; }
+.expired .label { color: var(--blood); font-weight: 700; }
+
+:global(.surface-paper) .timer { --c: var(--ink); }
+:global(.surface-paper) .digits { text-shadow: none; }
+:global(.surface-paper) .hurry { --c: #8a5a00; }
+:global(.surface-paper) .critical,
+:global(.surface-paper) .expired { --c: #b3261e; }
+
+@keyframes tick {
+  0% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+@keyframes tickBig {
+  0% { transform: scale(1.28) rotate(-2deg); }
+  40% { transform: scale(0.97) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); }
+}

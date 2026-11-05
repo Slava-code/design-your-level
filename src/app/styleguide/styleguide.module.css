@@ -1,0 +1,159 @@
+.page {
+  flex: 1;
+  padding-bottom: var(--s-10);
+}
+.hero {
+  position: relative;
+  min-height: min(78vh, 760px);
+  display: grid;
+  align-items: center;
+  padding: var(--s-10) var(--s-4) var(--s-9);
+  overflow: hidden;
+  border-bottom: 2px solid var(--line);
+}
+.heroInner {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-7);
+}
+.heroLede {
+  max-width: 34rem;
+  font-size: var(--fs-lg);
+  color: var(--bone);
+  background: rgba(4, 14, 8, 0.72);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  border-left: 4px solid var(--phos);
+}
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.toc a {
+  font-family: var(--font-terminal);
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  padding: 0.2em 0.7em;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: rgba(4, 14, 8, 0.7);
+}
+.toc a:hover {
+  background: var(--phos);
+  color: var(--phos-black);
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-10);
+  padding-top: var(--s-9);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  scroll-margin-top: var(--s-6);
+}
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.sectionTitle {
+  font-size: var(--fs-2xl);
+  color: var(--bone);
+}
+.split {
+  display: grid;
+  gap: var(--s-5);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+.panelRow {
+  display: grid;
+  gap: var(--s-6);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  padding: var(--s-3) var(--s-2);
+}
+.typeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.tLabel {
+  display: block;
+  font-family: var(--font-terminal);
+  font-size: var(--fs-md);
+  color: var(--text-muted);
+  margin-bottom: var(--s-1);
+}
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--s-3);
+}
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-xs);
+}
+.swatch span {
+  height: 56px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  margin-bottom: var(--s-1);
+}
+.swatch code {
+  font-family: var(--font-terminal);
+  font-size: var(--fs-md);
+  color: var(--text-strong);
+}
+.swatch small {
+  color: var(--text-muted);
+}
+.projector {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-8) var(--s-4);
+  border-radius: var(--r-lg);
+  border: 2px solid var(--line-strong);
+  overflow: hidden;
+  min-height: 360px;
+}
+.podiumStage {
+  padding: var(--s-6) clamp(var(--s-3), 4vw, var(--s-10)) 0;
+  justify-content: flex-end;
+  min-height: 0;
+  overflow: visible;
+}
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--line);
+}
+

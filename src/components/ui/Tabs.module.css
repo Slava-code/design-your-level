@@ -1,0 +1,95 @@
+.list {
+  display: inline-flex;
+  gap: 4px;
+  padding: 5px;
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.list::-webkit-scrollbar { display: none; }
+.fill {
+  display: flex;
+}
+.fill .tab {
+  flex: 1;
+}
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: var(--tap);
+  padding: 0.3em 1.2em;
+  border-radius: calc(var(--r-lg) - 5px);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-md);
+  white-space: nowrap;
+  color: var(--text-muted);
+  transition: color var(--dur) ease, background var(--dur) ease, transform var(--dur-fast) var(--ease-bounce);
+}
+.tab:hover:not(:disabled):not(.active) {
+  color: var(--text-strong);
+  background: var(--surface-2);
+}
+.tab:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.active {
+  color: var(--accent-ink);
+  background: var(--accent);
+  box-shadow: 0 3px 0 var(--accent-shade), 0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.tab:disabled {
+  opacity: 0.4;
+}
+.badge {
+  min-width: 1.6em;
+  height: 1.6em;
+  padding: 0 0.4em;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 99px;
+  font-family: var(--font-terminal);
+  font-size: 0.95em;
+  line-height: 1;
+  color: var(--danger-ink);
+  background: var(--danger);
+  animation: pop-in 400ms var(--ease-bounce);
+}
+
+.calm {
+  color: var(--ink);
+  background: var(--phos);
+}
+.active .calm {
+  color: var(--phos);
+  background: var(--ink);
+}
+.busyDot {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--phos);
+  box-shadow: 0 0 10px var(--phos);
+  animation: dotPulse 1.1s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+.active .busyDot {
+  background: var(--ink);
+  box-shadow: none;
+}

@@ -1,0 +1,117 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  line-height: 1.05;
+  color: var(--heading-color);
+}
+.elapsed {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2em;
+  font-family: var(--font-terminal);
+  color: var(--accent);
+}
+.secs {
+  font-size: clamp(2.4rem, 2rem + 2vw, 3.6rem);
+  line-height: 0.8;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+:global(.surface-paper) .secs { text-shadow: none; }
+.unit {
+  font-size: var(--fs-lg);
+  color: var(--text-muted);
+}
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 52px;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  border: 1.5px solid transparent;
+  transition: background var(--dur) ease, border-color var(--dur) ease, opacity var(--dur) ease;
+}
+.mark {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--font-terminal);
+  font-size: 1.4rem;
+  line-height: 1;
+  border: 2px solid var(--line-strong);
+  color: var(--text-muted);
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.label {
+  font-weight: 600;
+  font-size: var(--fs-md);
+}
+.hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.todo {
+  opacity: 0.5;
+}
+.done .mark {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  animation: pop-in 360ms var(--ease-bounce);
+}
+.done .label {
+  color: var(--text-muted);
+}
+.active {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  background-image: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--accent) 14%, transparent) 50%, transparent 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+.active .mark {
+  border-color: var(--accent);
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+.active .label {
+  color: var(--text-strong);
+  font-weight: 700;
+}
+.fail {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+.fail .mark {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--danger-ink);
+}
+.failed .elapsed { color: var(--danger); }

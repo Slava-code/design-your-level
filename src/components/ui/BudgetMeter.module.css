@@ -1,0 +1,95 @@
+.meter {
+  --c: var(--phos);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.mid { --c: var(--amber); }
+.low { --c: var(--blood); }
+:global(.surface-paper) .meter { --c: #1f6b38; }
+:global(.surface-paper) .mid { --c: #8a5a00; }
+:global(.surface-paper) .low { --c: #b3261e; }
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+}
+.label {
+  font-family: var(--label-font);
+  font-size: var(--fs-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+:global(.surface-paper) .label { font-size: var(--fs-sm); }
+.left {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.money {
+  font-family: var(--font-terminal);
+  font-size: 1.9em;
+  line-height: 0.9;
+  color: var(--c);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--c) 40%, transparent);
+}
+:global(.surface-paper) .money { text-shadow: none; }
+
+.track {
+  position: relative;
+  height: 16px;
+  border-radius: 99px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), var(--bg) calc(10% - 2px) 10%),
+    var(--surface-2);
+  border: 1.5px solid var(--line-strong);
+}
+.spent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--c);
+  box-shadow: 0 0 12px var(--c);
+  transition: width var(--dur-slow) var(--ease-out), background var(--dur) ease;
+  opacity: 0.85;
+}
+.reserved {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(-45deg, var(--c) 0 5px, transparent 5px 10px);
+  opacity: 0.7;
+  animation: shimmer 1.2s linear infinite;
+}
+.low .track {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-family: var(--font-terminal);
+  font-size: var(--fs-lg);
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.of { color: var(--text-muted); }
+.bottom > span:last-child:not(:first-child) {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  align-self: center;
+}
+
+.compact { gap: 4px; min-width: 140px; }
+.compact .track { height: 9px; }
+.compact .bottom { font-size: var(--fs-md); }
+.compact .bottom > span:last-child:not(:first-child) { font-family: var(--font-terminal); font-size: var(--fs-md); color: var(--c); }
+.compact .money { font-size: 1em; text-shadow: none; }

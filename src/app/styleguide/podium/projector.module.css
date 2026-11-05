@@ -1,0 +1,30 @@
+/* ---- projector demo (/styleguide/podium) ---- */
+.projScreen {
+  flex: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.projHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-6);
+}
+.projCenter {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+.projPodium {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 clamp(var(--s-4), 6vw, var(--s-11));
+}
+.projPodium > * {
+  max-width: min(100%, 170vh);
+}
