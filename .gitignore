@@ -51,3 +51,6 @@ print/
 test-results/
 playwright-report/
 spike/out/
+
+# per-agent dev builds
+.next-*/
