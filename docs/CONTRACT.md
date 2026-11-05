@@ -40,3 +40,9 @@ export function estimateFollowupUsd(nRefs: number): number;
 export const MODELS: { text: string; image: string };            // from env TEXT_MODEL / IMAGE_MODEL with defaults
 ```
 All functions honour `MOCK_AI=1`. They throw only on unexpected errors; refusals are returned, not thrown.
+
+## Databases
+Production uses the Neon database in `DATABASE_URL` (`neondb`). For development each worker gets its own database on the same Neon server so test runs don't collide: set `DEV_DB_NAME=<name>` and the DB helper (and `scripts/migrate.mjs`) swap the database name in `DATABASE_URL` when `NODE_ENV !== "production"` or when `DEV_DB_NAME` is set explicitly. Existing dev databases: `dyl_dev_backend`, `dyl_dev_team`, `dyl_dev_admin`, `dyl_dev_qa`. Never point tests at `neondb`.
+
+## Skeleton already present
+`src/lib/ai/index.ts` (interface + MOCK_AI implementation, done) and `src/lib/ai/openai.ts` (stubs; the AI-layer worker fills them in). Backend code imports only from `@/lib/ai`.
