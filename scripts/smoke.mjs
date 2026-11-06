@@ -338,8 +338,8 @@ async function main() {
   // VOTING
   r = await admin.post("/api/admin/phase", { phase: "VOTING", durationSec: 240 });
   expect(r.status === 200 && r.json.phase === "VOTING", "phase -> VOTING");
-  r = await A.post("/api/team/name", { name: "Too late" });
-  expect(r.status === 409, "rename locked during VOTING");
+  r = await A.post("/api/team/name", { name: "The Night Shift" });
+  expect(r.status === 200 && r.json.team.name === "The Night Shift", "rename still allowed during VOTING");
   r = await B.post("/api/submit", { generationId: b1 });
   expect(r.status === 409, "submit locked during VOTING");
   r = await A.post("/api/generate", { design: design(), references: [], askQuestions: false });
@@ -430,6 +430,11 @@ async function main() {
   expect(sA.reveal && sA.reveal.revealed.length === 0 && !("ranking" in sA), "team sees nothing revealed yet");
   r = await admin.post("/api/admin/reveal", { action: "next" });
   expect(r.status === 200 && r.json.reveal.step === 1 && r.json.reveal.revealed[0].rank === 3 && r.json.reveal.revealed[0].slot === 1, "step 1 reveals 3rd place");
+  r = await A.post("/api/team/name", { name: "Renamed On Stage" });
+  expect(r.status === 200, "rename allowed during REVEAL");
+  as = await admin.state("admin");
+  expect(as.reveal.revealed[0].name === "Renamed On Stage", "podium shows the new name after a rename");
+  r = await A.post("/api/team/name", { name: "The Night Shift" });
   r = await admin.post("/api/admin/reveal", { action: "next" });
   expect(r.json.reveal.step === 2 && r.json.reveal.revealed.map((x) => x.rank).join() === "3,2", "step 2 reveals 2nd place");
   r = await admin.post("/api/admin/reveal", { action: "next" });

@@ -88,7 +88,7 @@ export function buildTeamState(bundle: { event: EventRow; team: Row; gens: Row[]
     team: summary,
     generations,
     submittedGenerationId: submittedId,
-    canRename: event.phase === "LOBBY" || event.phase === "DESIGN",
+    canRename: true,
     uploadPrefix: refsPrefix(Number(event.epoch), summary.slot),
     nextGenerateAsksQuestions: !hadFollowups,
     estimates: { generateUsd: estimateGenerationUsd(0), withQuestionsUsd: estimateFollowupUsd(0) + estimateGenerationUsd(0) },

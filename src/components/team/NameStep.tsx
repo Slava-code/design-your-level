@@ -48,7 +48,7 @@ export function NameStep({ state, onDone, refresh }: Props) {
         <label htmlFor="team-name" className={s.nameLabel}>
           Pick a team name
         </label>
-        <p className={s.nameHint}>Optional. You can change it until voting starts.</p>
+        <p className={s.nameHint}>Optional. You can change it any time (tap the pencil next to your name).</p>
         <input
           id="team-name"
           className={s.nameInput}
