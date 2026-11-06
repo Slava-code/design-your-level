@@ -179,14 +179,15 @@ function Design({ state, offsetMs, timeUp }: { state: AdminState; offsetMs: numb
         <div className={s.titleBlock}>
           <span className={s.kicker}>Round 1 · Design</span>
           <h1 className={cx(s.title, "split-text")}>Design your level</h1>
-          <p className={s.sub}>Get from the start room to the exit, through 3 rooms.</p>
+          <p className={s.sub}>Take the player from the start of the level to the exit.</p>
+          <p className={s.showDontTell}>Show, don&apos;t tell!</p>
           <p className={s.sub}>
             Use all four: <b data-a="level">Level</b> <b data-a="enemy">Enemy</b> <b data-a="ability">Ability</b>{" "}
             <b data-a="puzzle">Puzzle</b>
           </p>
         </div>
         <div className={s.timerHuge}>
-          <Timer endsAt={state.phaseEndsAt} serverOffsetMs={offsetMs} size="giant" warnAt={10} expiredLabel={null} />
+          <Timer endsAt={state.phaseEndsAt} pausedMs={state.timerPausedMs} serverOffsetMs={offsetMs} size="giant" warnAt={10} expiredLabel={null} />
           <span className={s.timerCap}>
             {timeUp ? "Time is up. Submit what you have!" : `${t.submissions} of ${t.teamsJoined} submitted`}
           </span>
@@ -258,7 +259,7 @@ function Voting({ state, offsetMs, timeUp }: { state: AdminState; offsetMs: numb
           </p>
         </div>
         <div className={s.timerHuge}>
-          <Timer endsAt={state.phaseEndsAt} serverOffsetMs={offsetMs} size="giant" warnAt={10} expiredLabel={null} />
+          <Timer endsAt={state.phaseEndsAt} pausedMs={state.timerPausedMs} serverOffsetMs={offsetMs} size="giant" warnAt={10} expiredLabel={null} />
           <span className={s.timerCap}>{timeUp ? "Time is up. Last ratings!" : `${t.votersDone} of ${t.teamsJoined} teams done`}</span>
         </div>
       </div>
@@ -376,8 +377,12 @@ function Closed({ state }: { state: AdminState }) {
   return (
     <div className={s.closed}>
       <div className={s.closedHead}>
-        <h1 className={cx(s.title, "split-text")}>Thanks for playing</h1>
-        <p className={s.sub}>Every level designed today. Snacks go to the winners.</p>
+        <span className={s.kicker}>Reflection</span>
+        <h1 className={cx(s.title, "split-text")}>What did the AI get wrong?</h1>
+        <p className={s.sub}>
+          Look at your storyboard. What did it misunderstand? Was it your words or the AI? What would you write
+          differently next time?
+        </p>
       </div>
       {n === 0 ? (
         <p className={s.lockText}>No storyboards were submitted.</p>

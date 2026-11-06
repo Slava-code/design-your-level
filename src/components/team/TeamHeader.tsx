@@ -18,7 +18,7 @@ type Props = { state: TeamState; serverOffsetMs: number; refresh: () => Promise<
 
 /** Sticky top bar: team name (editable), phase + timer, budget during DESIGN. */
 export function TeamHeader({ state, serverOffsetMs, refresh }: Props) {
-  const { team, phase, phaseEndsAt, canRename } = state;
+  const { team, phase, phaseEndsAt, timerPausedMs, canRename } = state;
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(team.name);
   const [busy, setBusy] = useState(false);
@@ -105,8 +105,8 @@ export function TeamHeader({ state, serverOffsetMs, refresh }: Props) {
         </div>
         <div className={s.phaseBlock}>
           <span className={s.phaseLabel}>{PHASE_LABEL[phase]}</span>
-          {phaseEndsAt ? (
-            <Timer endsAt={phaseEndsAt} serverOffsetMs={serverOffsetMs} size="md" className={s.timer} />
+          {phaseEndsAt || timerPausedMs != null ? (
+            <Timer endsAt={phaseEndsAt} pausedMs={timerPausedMs} serverOffsetMs={serverOffsetMs} size="md" className={s.timer} />
           ) : (
             <span className={cx(s.phaseDot, phase === "DESIGN" || phase === "VOTING" ? s.live : null)} aria-hidden />
           )}

@@ -101,7 +101,7 @@ export const PHASE_HINT: Record<Phase, string> = {
 /** Default timer (seconds) when entering each phase. 0 = no timer. */
 export const DEFAULT_DURATION: Record<Phase, number> = {
   LOBBY: 0,
-  DESIGN: 8 * 60,
+  DESIGN: 15 * 60,
   VOTING: 4 * 60,
   REVEAL: 0,
   CLOSED: 0,

@@ -56,24 +56,22 @@
   .design {
     padding-top: var(--s-5);
   }
+  /* One column on laptops too: the form gets the full width, and the storyboards
+     (once there are any) sit below it, newest first, with the history strip as a gallery. */
   .columns {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-    gap: var(--s-7);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-8, 48px);
+    max-width: 1040px;
+    width: 100%;
+    margin: 0 auto;
   }
   .formCol,
   .boardCol {
     display: flex;
   }
   .boardCol {
-    position: sticky;
-    top: 108px;
-    max-height: calc(100dvh - 120px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 0 var(--s-2) var(--s-6);
-    margin: 0 calc(-1 * var(--s-2));
-    scrollbar-width: thin;
-    scrollbar-color: var(--phos-dim) transparent;
+    padding-top: var(--s-6);
+    border-top: 1.5px dashed var(--line);
   }
 }
 
@@ -1128,7 +1126,8 @@
 @media (min-width: 1100px) {
   .resultBoard {
     width: 100%;
-    max-width: max(420px, calc((100dvh - 400px) * 1.5));
+    max-width: max(640px, calc((100dvh - 250px) * 1.5));
+    margin-inline: auto;
   }
 }
 
@@ -1179,5 +1178,110 @@
 @media (prefers-reduced-motion: reduce) {
   .nudgeUrgent {
     animation: none;
+  }
+}
+
+.boardHeading {
+  display: none;
+}
+@media (min-width: 1100px) {
+  .boardHeading {
+    display: block;
+    margin: 0;
+    font-family: var(--font-display, inherit);
+    font-size: clamp(1.6rem, 2.2vw, 2.1rem);
+    color: var(--phos);
+  }
+}
+
+/* "Show, don't tell!" ink stamp at the top of the writing card. */
+.showDontTell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-1);
+  margin: var(--s-2) auto var(--s-1);
+  padding: var(--s-3) var(--s-5);
+  max-width: 100%;
+  border: 4px double var(--ink, #1a120a);
+  border-radius: 10px;
+  transform: rotate(-1.6deg);
+  text-align: center;
+  background: rgba(166, 124, 78, 0.12);
+}
+.sdtBig {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 6.5vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink, #1a120a);
+  text-transform: uppercase;
+}
+.sdtSub {
+  font-family: var(--font-type);
+  font-size: var(--fs-md);
+  color: var(--sepia-text, #6b4e2e);
+  max-width: 46ch;
+}
+.sdtSub b {
+  color: var(--ink, #1a120a);
+}
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-4deg);
+  }
+  40% {
+    transform: rotate(3.5deg);
+  }
+  60% {
+    transform: rotate(-2.5deg);
+  }
+  80% {
+    transform: rotate(1.5deg);
   }
 }

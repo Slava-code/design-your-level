@@ -133,3 +133,19 @@
   60% { transform: translateY(-4px) scale(1.12); }
   100% { transform: translateY(-3px) scale(1.04); }
 }
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

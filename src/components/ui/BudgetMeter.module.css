@@ -93,3 +93,22 @@
 .compact .bottom { font-size: var(--fs-md); }
 .compact .bottom > span:last-child:not(:first-child) { font-family: var(--font-terminal); font-size: var(--fs-md); color: var(--c); }
 .compact .money { font-size: 1em; text-shadow: none; }
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}

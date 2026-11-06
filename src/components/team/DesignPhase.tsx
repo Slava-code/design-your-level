@@ -53,16 +53,24 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
   const [askAgain, setAskAgain] = useState(false);
   const [busy, setBusy] = useState(false);
   const [restore, setRestore] = useState<GenerationView | null>(null);
+  // The storyboard area (and the phone's Storyboard tab) only exists once the team has generated something.
+  const [started, setStarted] = useState(generations.length > 0);
+  useEffect(() => {
+    if (generations.length > 0) setStarted(true);
+  }, [generations.length]);
   const boardRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   // Scroll requests run after the tab switch has rendered, so the target's final position is used.
   const [scrollReq, setScrollReq] = useState<{ to: "board" | "form"; n: number } | null>(null);
   const requestScroll = useCallback((to: "board" | "form") => setScrollReq((r) => ({ to, n: (r?.n ?? 0) + 1 })), []);
+  const handledScroll = useRef(0);
   useLayoutEffect(() => {
-    if (!scrollReq) return;
+    if (!scrollReq || handledScroll.current === scrollReq.n) return;
     const el = scrollReq.to === "board" ? boardRef.current : formRef.current;
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [scrollReq]);
+    if (!el) return;
+    handledScroll.current = scrollReq.n;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [scrollReq, started]);
 
   const inFlight = generations.find((g) => IN_FLIGHT_STATUSES.includes(g.status)) ?? null;
   const newestId = generations[0]?.id ?? null;
@@ -75,8 +83,9 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
       seenNewest.current = newestId;
       setSelectedId(newestId);
       setTab("board");
+      requestScroll("board");
     }
-  }, [newestId]);
+  }, [newestId, requestScroll]);
 
   // When a generation changes state while the board is NOT on screen (phone, Design tab), nudge with a toast.
   const tabRef = useRef(tab);
@@ -85,11 +94,14 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
   }, [tab]);
   const lastStatus = useRef<Record<string, string>>({});
   useEffect(() => {
-    const boardVisible = tabRef.current === "board" || window.matchMedia("(min-width: 1100px)").matches;
+    const wide = window.matchMedia("(min-width: 1100px)").matches;
+    const r = boardRef.current?.getBoundingClientRect();
+    const inView = !!r && r.top < window.innerHeight - 120 && r.bottom > 140;
+    const boardVisible = wide ? inView : tabRef.current === "board";
     for (const g of generations) {
       const prev = lastStatus.current[g.id];
       if (prev && prev !== g.status && !boardVisible) {
-        const open = { title: "Tap Storyboard to see it" };
+        const open = { title: window.matchMedia("(min-width: 1100px)").matches ? "Scroll down to see it" : "Tap Storyboard to see it" };
         if (g.status === "done") toast.success("Your storyboard is ready.", open);
         else if (g.status === "questions") toast.show("The artist has a few questions.", { tone: "info", ...open });
         else if ((g.status === "refused" || g.status === "error") && g.error !== "Cancelled.")
@@ -292,6 +304,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
 
   return (
     <main className={s.design} data-tab={tab}>
+      {started && (
       <div className={s.tabsBar}>
         <Tabs
           items={[
@@ -311,6 +324,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
           aria-label="Design or storyboard"
         />
       </div>
+      )}
 
       <div className={s.columns}>
         <section
@@ -319,7 +333,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
           id="dz-panel-design"
           role="tabpanel"
           aria-labelledby="dz-tab-design"
-          data-active={tab === "design" || undefined}
+          data-active={tab === "design" || !started || undefined}
         >
           {loaded ? (
             <DesignForm
@@ -383,6 +397,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
           </div>
         </section>
 
+        {started && (
         <section
           ref={boardRef}
           className={s.boardCol}
@@ -391,6 +406,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
           aria-labelledby="dz-tab-board"
           data-active={tab === "board" || undefined}
         >
+          <h2 className={s.boardHeading}>Your storyboards</h2>
           {selected && selected.status !== "done" && nudge("board")}
           <Board
             gen={selected}
@@ -418,6 +434,7 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
             />
           )}
         </section>
+        )}
       </div>
 
       <ConfirmDialog

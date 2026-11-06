@@ -86,8 +86,10 @@ function PhasePanel({ state, refresh }: { state: AdminState; refresh: () => void
     setDur(next && DEFAULT_DURATION[next] ? mmss(DEFAULT_DURATION[next]) : "");
   }, [next]);
 
-  const parsed = dur.trim() ? parseDuration(dur) : 0;
-  const durOk = parsed !== null && parsed <= 4 * 3600;
+  const timedNext = next === "DESIGN" || next === "VOTING";
+  const parsedRaw = dur.trim() ? parseDuration(dur) : 0;
+  const parsed = timedNext ? parsedRaw : 0;
+  const durOk = !timedNext || (parsedRaw !== null && parsedRaw <= 4 * 3600);
   const t = state.totals;
   const rv = state.reveal;
   const reveal = useRevealAction(state, refresh);
@@ -217,8 +219,9 @@ function PhasePanel({ state, refresh }: { state: AdminState; refresh: () => void
           </div>
           <p className={s.nextHint}>{PHASE_HINT[next]}</p>
           <div className={s.nextRow}>
+            {timedNext && (
             <label className={s.durLabel}>
-              <span>Timer</span>
+              <span>{PHASE_LABEL[next]} length</span>
               <input
                 className={s.durInput}
                 value={dur}
@@ -229,13 +232,20 @@ function PhasePanel({ state, refresh }: { state: AdminState; refresh: () => void
                 aria-describedby="dur-hint"
               />
             </label>
+            )}
             <Button size="xl" onClick={advance} loading={busy === next} disabled={!durOk || !!busy} className={s.goBtn}>
               {CTA[next]}
             </Button>
           </div>
-          <span id="dur-hint" className={s.durHint}>
-            {durOk ? (parsed ? `${mmss(parsed)} countdown on every screen` : "No countdown (leave empty)") : "Use m:ss, e.g. 8:00 or 4:30"}
-          </span>
+          {timedNext && (
+            <span id="dur-hint" className={s.durHint}>
+              {durOk
+                ? parsed
+                  ? `A ${mmss(parsed)} countdown starts on every screen when you press ${CTA[next]}.`
+                  : "No countdown (leave empty)."
+                : "Use m:ss, e.g. 15:00 or 4:30"}
+            </span>
+          )}
         </div>
       ) : (
         <p className={s.panelText}>This is the last phase. Use Reset event (below right) after testing to start fresh.</p>
@@ -267,8 +277,14 @@ function TimerPanel({ state, offsetMs, refresh }: { state: AdminState; offsetMs:
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [setVal, setSetVal] = useState("");
+  const [confirmEnd, setConfirmEnd] = useState(false);
 
-  async function send(body: { addSec?: number; setSec?: number }) {
+  const paused = state.timerPausedMs != null && !state.phaseEndsAt;
+  const running = !!state.phaseEndsAt && Date.parse(state.phaseEndsAt) - (Date.now() + offsetMs) > 0;
+  const hasTimer = running || paused;
+  const timed = state.phase === "DESIGN" || state.phase === "VOTING";
+
+  async function send(body: { addSec?: number; setSec?: number; action?: "pause" | "resume" | "end" }) {
     setBusy(true);
     const r = await api<TimerResponse>("/api/admin/timer", body);
     setBusy(false);
@@ -277,27 +293,46 @@ function TimerPanel({ state, offsetMs, refresh }: { state: AdminState; offsetMs:
   }
 
   const parsed = parseDuration(setVal);
+  const title = timed ? `${PHASE_LABEL[state.phase]} timer` : "Timer";
   return (
-    <Panel variant="terminal" kicker="Timer" title="Countdown" pad="md" titleAs="h3">
+    <Panel variant="terminal" kicker="Running now" title={title} pad="md" titleAs="h3">
       <div className={s.timerLayout}>
         <div className={s.timerBig}>
-          <Timer endsAt={state.phaseEndsAt} serverOffsetMs={offsetMs} size="lg" label={state.phaseEndsAt ? `${PHASE_LABEL[state.phase]} time` : "No timer"} />
+          <Timer
+            endsAt={state.phaseEndsAt}
+            pausedMs={state.timerPausedMs}
+            serverOffsetMs={offsetMs}
+            size="lg"
+            label={state.phaseEndsAt ? "left" : "No timer"}
+          />
         </div>
         <div className={s.timerControls}>
-          <div className={s.timerBtns}>
-            <Button variant="secondary" onClick={() => send({ addSec: -60 })} disabled={busy || !state.phaseEndsAt}>
-              -1:00
-            </Button>
-            <Button variant="secondary" onClick={() => send({ addSec: 30 })} disabled={busy}>
-              +0:30
-            </Button>
-            <Button variant="secondary" onClick={() => send({ addSec: 60 })} disabled={busy}>
-              +1:00
-            </Button>
-            <Button variant="secondary" onClick={() => send({ addSec: 120 })} disabled={busy}>
-              +2:00
-            </Button>
-          </div>
+          {hasTimer ? (
+            <>
+              <div className={s.timerBtns}>
+                <Button variant="primary" onClick={() => send({ action: paused ? "resume" : "pause" })} disabled={busy}>
+                  {paused ? "Resume" : "Pause"}
+                </Button>
+                <Button variant="danger" onClick={() => setConfirmEnd(true)} disabled={busy}>
+                  End now
+                </Button>
+              </div>
+              <div className={s.timerBtns}>
+                <Button variant="secondary" onClick={() => send({ addSec: -60 })} disabled={busy}>
+                  -1:00
+                </Button>
+                <Button variant="secondary" onClick={() => send({ addSec: 60 })} disabled={busy}>
+                  +1:00
+                </Button>
+                <Button variant="secondary" onClick={() => send({ addSec: 120 })} disabled={busy}>
+                  +2:00
+                </Button>
+                <Button variant="secondary" onClick={() => send({ addSec: 300 })} disabled={busy}>
+                  +5:00
+                </Button>
+              </div>
+            </>
+          ) : null}
           <form
             className={s.timerSet}
             onSubmit={(e) => {
@@ -309,19 +344,41 @@ function TimerPanel({ state, offsetMs, refresh }: { state: AdminState; offsetMs:
             }}
           >
             <label className={s.durLabel}>
-              <span>Set to</span>
-              <input className={s.durInput} value={setVal} onChange={(e) => setSetVal(e.target.value)} placeholder="5:00" aria-label="Set timer to (m:ss)" />
+              <span>{hasTimer ? "Change to" : "Start a countdown"}</span>
+              <input className={s.durInput} value={setVal} onChange={(e) => setSetVal(e.target.value)} placeholder={hasTimer ? "5:00" : "15:00"} aria-label="Countdown length (m:ss)" />
             </label>
-            <Button type="submit" variant="primary" disabled={busy || !parsed || parsed <= 0}>
-              Set
+            <Button type="submit" variant={hasTimer ? "ghost" : "primary"} disabled={busy || !parsed || parsed <= 0}>
+              {hasTimer ? "Set" : "Start"}
             </Button>
-            <Button variant="ghost" onClick={() => send({ setSec: 0 })} disabled={busy || !state.phaseEndsAt}>
-              Clear
-            </Button>
+            {hasTimer && (
+              <Button variant="ghost" onClick={() => send({ setSec: 0 })} disabled={busy}>
+                Remove
+              </Button>
+            )}
           </form>
         </div>
       </div>
-      <p className={s.durHint}>The timer is only a display. Phases change only when you press the phase button.</p>
+      <p className={s.durHint}>
+        This changes the countdown that is running now. It is only a display: the phase moves on when you press the big phase button.
+      </p>
+      <ConfirmDialog
+        open={confirmEnd}
+        title="End the countdown now?"
+        body={
+          <p>
+            Every screen jumps to 0:00 and shows that time is up. The phase does not change: press{" "}
+            {state.phase === "DESIGN" ? "Start voting" : state.phase === "VOTING" ? "Go to the podium" : "the phase button"} when you are ready to move on.
+          </p>
+        }
+        confirmLabel="End now"
+        danger
+        busy={busy}
+        onConfirm={() => {
+          setConfirmEnd(false);
+          void send({ action: "end" });
+        }}
+        onCancel={() => setConfirmEnd(false)}
+      />
     </Panel>
   );
 }

@@ -10,6 +10,9 @@ export const dynamic = "force-dynamic";
 export const POST = route(async (req: Request) => {
   await requireAdmin();
   const body = await readJson<Partial<TimerRequest>>(req);
-  const event = await adjustTimer(body.addSec, body.setSec);
-  return json<TimerResponse>({ phaseEndsAt: isoOrNull(event.phase_ends_at) });
+  const event = await adjustTimer(body.addSec, body.setSec, body.action);
+  return json<TimerResponse>({
+    phaseEndsAt: isoOrNull(event.phase_ends_at),
+    timerPausedMs: event.timer_paused_ms == null ? null : Number(event.timer_paused_ms),
+  });
 });

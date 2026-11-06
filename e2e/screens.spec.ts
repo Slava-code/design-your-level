@@ -305,7 +305,7 @@ test("visual walkthrough", async ({ browser }) => {
 
   // CLOSED
   await api(admin.request, "POST", "/api/admin/phase", { phase: "CLOSED" });
-  await expect(screen.getByRole("heading", { name: "Thanks for playing" })).toBeVisible();
+  await expect(screen.getByRole("heading", { name: "What did the AI get wrong?" })).toBeVisible();
   await sleep(1500);
   await snap(screen, "screen-closed");
   await snap(admin, "admin-results-closed");

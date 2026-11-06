@@ -12,7 +12,7 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 
 const EMPTY: Partial4 = { level: null, enemy: null, ability: null, puzzle: null };
 const ASPECT_HINT: Record<keyof Scores, string> = {
-  level: "Do the start room, 3 rooms and exit create the feeling?",
+  level: "Does the space, from start to exit, create the feeling?",
   enemy: "Does the enemy create the feeling?",
   ability: "Does the ability fit and matter?",
   puzzle: "Is the puzzle clear, and does it fit the feeling?",

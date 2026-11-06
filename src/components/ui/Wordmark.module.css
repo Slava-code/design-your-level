@@ -100,3 +100,37 @@
 
 .animate .design { animation: rise-in 500ms var(--ease-out) both; }
 .animate .level { animation: slam 750ms var(--ease-out) 220ms both; }
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.4) rotate(-6deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(1deg);
+  }
+  75% {
+    transform: scale(1.04) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}

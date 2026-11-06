@@ -25,6 +25,7 @@ export function base(event: EventRow): StateBase {
     phase: event.phase,
     phaseStartedAt: iso(event.phase_started_at),
     phaseEndsAt: isoOrNull(event.phase_ends_at),
+    timerPausedMs: event.timer_paused_ms == null ? null : Number(event.timer_paused_ms),
     serverNow: new Date().toISOString(),
     epoch: Number(event.epoch),
   };

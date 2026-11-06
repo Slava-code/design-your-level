@@ -127,7 +127,7 @@ export async function changePhase(to: Phase, durationSecRaw: unknown): Promise<{
     // (a DB blip right after the flip): assignments or ranking still missing well after the phase began.
     await q(
       `UPDATE event_state SET phase_ends_at = CASE WHEN $1::int IS NULL THEN NULL ELSE now() + ($1::int * interval '1 second') END,
-              updated_at = now() WHERE id = 1`,
+              timer_paused_ms = NULL, updated_at = now() WHERE id = 1`,
       [durationSec],
     );
     const stale = new Date(ev.now).getTime() - new Date(ev.phase_started_at).getTime() > 5000;
@@ -149,6 +149,7 @@ export async function changePhase(to: Phase, durationSecRaw: unknown): Promise<{
   const flipped = await q(
     `UPDATE event_state SET phase = $1, phase_started_at = now(),
             phase_ends_at = CASE WHEN $2::int IS NULL THEN NULL ELSE now() + ($2::int * interval '1 second') END,
+            timer_paused_ms = NULL,
             voting_frozen_at = CASE WHEN $1 IN ('LOBBY','DESIGN') OR ($1 = 'VOTING' AND $3 = 'DESIGN') THEN NULL
                                     ELSE voting_frozen_at END,
             reveal_step = CASE WHEN $1 IN ('REVEAL','CLOSED') AND $3 IN ('REVEAL','CLOSED') THEN reveal_step ELSE 0 END,
@@ -175,12 +176,34 @@ export async function changePhase(to: Phase, durationSecRaw: unknown): Promise<{
   return { event: await getEvent(), warning };
 }
 
-export async function adjustTimer(addSec: unknown, setSec: unknown): Promise<EventRow> {
-  if (setSec != null) {
+export async function adjustTimer(addSec: unknown, setSec: unknown, action?: unknown): Promise<EventRow> {
+  // While paused, phase_ends_at is NULL and timer_paused_ms holds what was left.
+  if (action === "pause") {
+    await q(
+      `UPDATE event_state SET timer_paused_ms = GREATEST(0, (EXTRACT(EPOCH FROM (phase_ends_at - now())) * 1000)::int),
+              phase_ends_at = NULL, updated_at = now()
+        WHERE id = 1 AND phase_ends_at IS NOT NULL AND phase_ends_at > now()`,
+    );
+  } else if (action === "resume") {
+    await q(
+      `UPDATE event_state SET phase_ends_at = now() + (timer_paused_ms * interval '1 millisecond'), timer_paused_ms = NULL,
+              updated_at = now()
+        WHERE id = 1 AND timer_paused_ms IS NOT NULL`,
+    );
+  } else if (action === "end") {
+    await q(`UPDATE event_state SET phase_ends_at = now(), timer_paused_ms = NULL, updated_at = now() WHERE id = 1`);
+  } else if (action != null) {
+    throw new ApiErr("bad_request", "Unknown timer action.");
+  } else if (setSec != null) {
     const n = Number(setSec);
     if (!Number.isFinite(n) || n < 0 || n > 4 * 3600) throw new ApiErr("bad_request", "setSec must be between 0 and 14400.");
+    // Setting a time keeps a paused timer paused (at the new value); otherwise it starts counting.
     await q(
-      `UPDATE event_state SET phase_ends_at = CASE WHEN $1::int = 0 THEN NULL ELSE now() + ($1::int * interval '1 second') END,
+      `UPDATE event_state SET
+              phase_ends_at = CASE WHEN $1::int = 0 THEN NULL WHEN timer_paused_ms IS NOT NULL THEN NULL
+                                   ELSE now() + ($1::int * interval '1 second') END,
+              timer_paused_ms = CASE WHEN $1::int = 0 THEN NULL WHEN timer_paused_ms IS NOT NULL THEN $1::int * 1000
+                                     ELSE NULL END,
               updated_at = now() WHERE id = 1`,
       [Math.round(n)],
     );
@@ -188,14 +211,18 @@ export async function adjustTimer(addSec: unknown, setSec: unknown): Promise<Eve
     const n = Number(addSec);
     if (!Number.isFinite(n) || Math.abs(n) > 3600) throw new ApiErr("bad_request", "addSec must be between -3600 and 3600.");
     await q(
-      `UPDATE event_state SET phase_ends_at = GREATEST(COALESCE(phase_ends_at, now()), now()) + ($1::int * interval '1 second'),
+      `UPDATE event_state SET
+              phase_ends_at = CASE WHEN timer_paused_ms IS NOT NULL THEN NULL
+                                   ELSE GREATEST(COALESCE(phase_ends_at, now()), now()) + ($1::int * interval '1 second') END,
+              timer_paused_ms = CASE WHEN timer_paused_ms IS NOT NULL THEN GREATEST(0, timer_paused_ms + $1::int * 1000)
+                                     ELSE NULL END,
               updated_at = now() WHERE id = 1`,
       [Math.round(n)],
     );
   } else {
-    throw new ApiErr("bad_request", "Send addSec or setSec.");
+    throw new ApiErr("bad_request", "Send addSec, setSec or action.");
   }
-  await logFeed("timer", null, { addSec: addSec ?? null, setSec: setSec ?? null });
+  await logFeed("timer", null, { addSec: addSec ?? null, setSec: setSec ?? null, action: action ?? null });
   return getEvent();
 }
 
@@ -252,7 +279,7 @@ export async function resetEvent(): Promise<{ epoch: number; blobsDeleted: numbe
     ["DELETE FROM join_attempts", []],
     [
       `UPDATE event_state SET epoch = epoch + 1, phase = 'LOBBY', phase_started_at = now(), phase_ends_at = NULL,
-              reveal_step = 0, voting_frozen_at = NULL, ranking = NULL, updated_at = now()
+              reveal_step = 0, voting_frozen_at = NULL, ranking = NULL, timer_paused_ms = NULL, updated_at = now()
         WHERE id = 1 RETURNING epoch`,
       [],
     ],

@@ -57,3 +57,18 @@
 :global(.surface-paper) .idle { --c: var(--sepia-text); }
 :global(.surface-paper) .voting { --c: var(--sepia-text); }
 :global(.surface-paper) .error { --c: #b3261e; }
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}

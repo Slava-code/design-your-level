@@ -37,7 +37,7 @@ const STYLES = [
   "comic book ink",
 ];
 
-const PATH_HINT = "Start room, 3 rooms, exit.";
+const PATH_HINT = "The path from the start to the exit.";
 
 const ASPECTS: {
   k: "level" | "enemy" | "ability" | "puzzle";
@@ -48,13 +48,13 @@ const ASPECTS: {
   {
     k: "level",
     label: "Level",
-    hint: `${PATH_HINT} What do the rooms look like, and how does the space create your feeling?`,
-    placeholder: "A flooded subway station. Room 1 is a dark ticket hall, room 2...",
+    hint: `${PATH_HINT} What does the place look like along the way, and how does the space create your feeling?`,
+    placeholder: "A flooded subway station. You start in a dark ticket hall, wade through the tunnels...",
   },
   {
     k: "enemy",
     label: "Enemy",
-    hint: "What hunts the player through those rooms? How does it look and behave, and how does it create your feeling?",
+    hint: "What hunts the player along the way? How does it look and behave, and how does it create your feeling?",
     placeholder: "A tall shape made of wet newspaper that only moves when the lights flicker...",
   },
   {
@@ -118,7 +118,7 @@ export function DesignForm({ fields, setField, errors, refs, uploads, remainingR
         <p className={s.formKicker}>Design document</p>
         <h1 className={s.formTitle}>Build your level</h1>
         <p className={s.formLead}>
-          Get the player from the <b>start room</b> to the <b>exit</b> through <b>3 rooms</b>. Short answers are fine. The
+          Get the player from the <b>start</b> of the level to the <b>exit</b>. Short answers are fine. The
           artist fills the gaps.
         </p>
       </div>
@@ -178,6 +178,12 @@ export function DesignForm({ fields, setField, errors, refs, uploads, remainingR
           <span className={s.blockNum}>04-07</span> The four aspects
         </h2>
         <p className={s.docLead}>For each one: how does it create your feeling?</p>
+        <div className={s.showDontTell} role="note">
+          <span className={s.sdtBig}>Show, don&apos;t tell!</span>
+          <span className={s.sdtSub}>
+            Not &quot;it&apos;s scary&quot;: what does the player <b>see</b>, <b>hear</b> and <b>do</b> that makes it scary?
+          </span>
+        </div>
         <div className={s.blockBody}>
           {ASPECTS.map((a) => (
             <div key={a.k} data-field={a.k} className={s.aspectField}>

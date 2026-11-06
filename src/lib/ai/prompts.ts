@@ -23,7 +23,7 @@ export function designText(d: DesignInput): string {
     `GENRE: ${f(d.genre)}`,
     `FEELING / ATMOSPHERE: ${f(d.feeling)}`,
     `ART STYLE: ${f(d.artStyle)}`,
-    `LEVEL (start room to exit through 3 rooms): ${f(d.level)}`,
+    `LEVEL (the path from the start to the exit): ${f(d.level)}`,
     `ENEMY: ${f(d.enemy)}`,
     `ABILITY: ${f(d.ability)}`,
     `PUZZLE (at the exit): ${f(d.puzzle)}`,
@@ -42,10 +42,10 @@ export function qaText(qa: QA[]): string {
 
 // ---------------------------------------------------------------- follow-up questions
 
-export const FOLLOWUP_SYSTEM = `You are the storyboard artist for a live game-design activity in a college English class ("Video Games and Game Design"). Teams of 4 students have a few minutes to design one video-game level that uses four parts: the LEVEL (start room to exit through 3 rooms), an ENEMY, an ABILITY the player finds, and a PUZZLE at the exit. You will draw it as one image with four storyboard panels: (1) entering the level, (2) the enemy encounter, (3) finding the ability, (4) solving the puzzle at the exit.
+export const FOLLOWUP_SYSTEM = `You are the storyboard artist for a live game-design activity in a college English class ("Video Games and Game Design"). Teams of 4 students have a few minutes to design one video-game level that uses four parts: the LEVEL (the path from the start to the exit), an ENEMY, an ABILITY the player finds, and a PUZZLE at the exit. You will draw it as one image with four storyboard panels: (1) entering the level, (2) the enemy encounter, (3) finding the ability, (4) solving the puzzle at the exit.
 
 Before drawing you get ONE chance to ask the team follow-up questions. Ask only what you genuinely need to draw THEIR idea well. Go through this checklist and ask only about real gaps, most important first:
-1. Can I picture the space: size, light, materials, the layout of the 3 rooms?
+1. Can I picture the space: size, light, materials, and how it changes from the start to the exit?
 2. Does the enemy have a look and a behavior (how it hunts, what warns you it is near)?
 3. Where is the ability found, and what does it let you do or reach?
 4. What does the puzzle look like, and what does solving it change?
@@ -82,7 +82,7 @@ export const FOLLOWUP_SCHEMA = {
 export const PROMPT_SYSTEM = `You write the prompt for an image model that will draw a student team's video-game level as a storyboard. This is a live activity in a college class on video games and horror game design; the teams will see your prompt, so it must read as THEIR design.
 
 THE IMAGE: one single landscape image (3:2) laid out as a 2x2 storyboard grid of four equal panels separated by thin, clean gutters. Reading order left to right, top to bottom:
-- Panel 1 (top left): entering the level, the first room as the player walks in.
+- Panel 1 (top left): entering the level, the starting area as the player walks in.
 - Panel 2 (top right): the enemy encounter.
 - Panel 3 (bottom left): finding the ability, and a hint of what it does.
 - Panel 4 (bottom right): solving the puzzle at the exit, with the exit opening or the solution taking effect.
@@ -137,7 +137,7 @@ export function fallbackImagePrompt(d: DesignInput, qa: QA[]): string {
   const refs = d.references.map((r: RefImage, i) => `Image ${i + 1} is the team's ${FIELD_LABEL[r.field] ?? r.field} reference.`);
   return [
     `One landscape image laid out as a 2x2 storyboard grid of four equal panels with thin gutters, art style: ${f(d.artStyle, "moody painted concept art")}. Genre: ${f(d.genre, "adventure")}. Feeling: ${f(d.feeling, "tense")}. The same protagonist appears in every panel.`,
-    `Panel 1 (top left), entering the level: ${f(d.level, "the first room")}.`,
+    `Panel 1 (top left), entering the level: ${f(d.level, "the starting area")}.`,
     `Panel 2 (top right), the enemy encounter: ${f(d.enemy, "a mysterious enemy")}.`,
     `Panel 3 (bottom left), finding the ability: ${f(d.ability, "a strange new power")}.`,
     `Panel 4 (bottom right), solving the puzzle at the exit: ${f(d.puzzle, "a puzzle that opens the exit")}.`,

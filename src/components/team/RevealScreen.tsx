@@ -112,7 +112,18 @@ export function ClosedScreen({ state }: { state: TeamState }) {
             <h2 className={s.closedCardTitle}>Your entry</h2>
             <Storyboard gen={sub} alt="Your submitted storyboard" />
           </section>
-        ) : (
+        ) : null}
+        <section className={s.reflect} aria-labelledby="reflect-h">
+          <h2 id="reflect-h" className={s.reflectTitle}>
+            What did the AI get wrong?
+          </h2>
+          <ul className={s.reflectList}>
+            <li>What in the picture is not what you meant?</li>
+            <li>Was it your words (too vague, or telling instead of showing) or the AI misreading them?</li>
+            <li>What would you write differently next time?</li>
+          </ul>
+        </section>
+        {sub && sub.imageUrl ? null : (
           <p className={s.closedText}>Your team didn&apos;t submit a storyboard this time, but your votes counted.</p>
         )}
         {state.reveal && state.reveal.revealed.length > 0 && (

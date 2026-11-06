@@ -248,16 +248,41 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
   expect(r0).toBeGreaterThan(400);
   await admin.getByRole("button", { name: "+1:00" }).click();
   await expect.poll(remaining).toBeGreaterThan(r0 + 50);
-  await admin.getByLabel("Set timer to (m:ss)").fill("5:00");
+  await admin.getByLabel("Countdown length (m:ss)").fill("5:00");
   await admin.getByRole("button", { name: "Set", exact: true }).click();
   await expect.poll(async () => Math.round((await remaining()) ?? 0)).toBeLessThanOrEqual(300);
   await expect.poll(async () => Math.round((await remaining()) ?? 0)).toBeGreaterThan(290);
   await admin.getByRole("button", { name: "-1:00" }).click();
   await expect.poll(async () => Math.round((await remaining()) ?? 0)).toBeLessThanOrEqual(240);
-  await admin.getByRole("button", { name: "Clear" }).click();
+
+  // Pause freezes the countdown everywhere; Resume continues from the same time.
+  const pausedMs = async () => (await getJson(admin.request, "/api/state?view=admin")).timerPausedMs as number | null;
+  await admin.getByRole("button", { name: "Pause", exact: true }).click();
   await expect.poll(remaining).toBeNull();
-  await admin.getByLabel("Set timer to (m:ss)").fill("6:00");
-  await admin.getByRole("button", { name: "Set", exact: true }).click();
+  await expect.poll(pausedMs).toBeGreaterThan(200_000);
+  await expect(screen.getByRole("timer", { name: /paused/i }).first()).toBeVisible();
+  await expect(teams[0].page.getByRole("timer", { name: /paused/i }).first()).toBeVisible();
+  const frozen = (await pausedMs())!;
+  await admin.waitForTimeout(2500);
+  expect(await pausedMs()).toBe(frozen);
+  await admin.getByRole("button", { name: "Resume", exact: true }).click();
+  await expect.poll(pausedMs).toBeNull();
+  await expect.poll(async () => Math.round((await remaining()) ?? 0)).toBeGreaterThan(Math.round(frozen / 1000) - 5);
+
+  // End now jumps to 0:00 (with a confirm) without changing the phase.
+  await admin.getByRole("button", { name: "End now", exact: true }).click();
+  await admin.getByRole("dialog").getByRole("button", { name: "End now" }).click();
+  await expect.poll(async () => Math.round((await remaining()) ?? 99)).toBeLessThanOrEqual(0);
+  expect((await getJson(admin.request, "/api/state?view=admin")).phase).toBe("DESIGN");
+
+  // After End now the panel offers a fresh countdown; Remove clears a running one.
+  await admin.getByLabel("Countdown length (m:ss)").fill("6:00");
+  await admin.getByRole("button", { name: "Start", exact: true }).click();
+  await expect.poll(async () => Math.round((await remaining()) ?? 0)).toBeGreaterThan(350);
+  await admin.getByRole("button", { name: "Remove", exact: true }).click();
+  await expect.poll(remaining).toBeNull();
+  await admin.getByLabel("Countdown length (m:ss)").fill("6:00");
+  await admin.getByRole("button", { name: "Start", exact: true }).click();
   await expect.poll(async () => Math.round((await remaining()) ?? 0)).toBeGreaterThan(350);
   await expect(screen.getByRole("timer", { name: /^[56] minutes/ }).first()).toBeVisible();
 
@@ -276,7 +301,7 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
     (async () => {
       await redraw(t3, { Puzzle: "Reroute power through three fuse boxes. MOCK_REFUSE" });
       await expect(t3.page.getByRole("heading", { name: "The artist wouldn't draw this version" })).toBeVisible({ timeout: 30_000 });
-      await expect(t3.page.getByText(/This attempt used \$0\.01/)).toBeVisible();
+      await expect(t3.page.getByText(/This attempt used 1 credit/)).toBeVisible();
       await shot(t3.page, "team-refused");
       await t3.page.getByRole("button", { name: "Back to editing" }).click();
       await field(t3.page, "Puzzle").fill("Reroute power through three fuse boxes to open the exit gate.");
@@ -322,15 +347,15 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
     await expect(t5.page.getByRole("heading", { name: "The artist wouldn't draw this version" })).toBeVisible({ timeout: 30_000 });
     await t5.page.getByRole("button", { name: "Back to editing" }).click();
     await field(t5.page, "Puzzle").fill("Reroute power through three fuse boxes to open the exit gate.");
-    await expect(t5.page.getByText(/Out of budget for new drawings/)).toBeVisible();
+    await expect(t5.page.getByText(/Out of credits for new drawings/)).toBeVisible();
     await expect(t5.page.getByRole("button", { name: "Redraw storyboard" })).toBeDisabled();
     await shot(t5.page, "team-out-of-budget");
 
     await admin.getByRole("tab", { name: /Teams/ }).click();
     const row = admin.locator("tr", { hasText: "Team 5 ·" });
-    await row.getByRole("button", { name: "Reset budget" }).click();
-    await admin.getByRole("dialog").getByRole("button", { name: "Reset budget" }).click();
-    await expect(t5.page.getByText(/Out of budget for new drawings/)).toBeHidden();
+    await row.getByRole("button", { name: "Reset credits" }).click();
+    await admin.getByRole("dialog").getByRole("button", { name: "Reset credits" }).click();
+    await expect(t5.page.getByText(/Out of credits for new drawings/)).toBeHidden();
     expect((await teamState(t5)).team.spendUsd).toBe(0);
     await t5.page.getByRole("button", { name: "Redraw storyboard" }).click();
     await expect(t5.page.getByRole("button", { name: "Submit this one instead" })).toBeVisible({ timeout: 30_000 });
@@ -440,7 +465,7 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
 
   // ------------------------------------------------------------------ CLOSED
   await startPhase(admin, "End and show the gallery", "CLOSED");
-  await expect(screen.getByRole("heading", { name: "Thanks for playing" })).toBeVisible();
+  await expect(screen.getByRole("heading", { name: "What did the AI get wrong?" })).toBeVisible();
   for (const t of teams) await expect(t.page.getByText("That's a wrap")).toBeVisible();
 
   // No code anywhere in what the admin, projector or team browsers render.

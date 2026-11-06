@@ -77,7 +77,7 @@ export function AdminApp() {
             <span className={s.phaseBadgeK}>Phase</span>
             {PHASE_LABEL[st.phase]}
           </span>
-          <Timer endsAt={st.phaseEndsAt} serverOffsetMs={live.offsetMs} size="sm" expiredLabel={null} />
+          <Timer endsAt={st.phaseEndsAt} pausedMs={st.timerPausedMs} serverOffsetMs={live.offsetMs} size="sm" expiredLabel={null} />
           <span className={s.headerSpend} title="Total OpenAI spend by all teams this event">
             {usd(st.totals.totalSpendUsd)} <span className="muted">spent</span>
           </span>

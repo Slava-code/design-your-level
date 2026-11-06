@@ -23,6 +23,8 @@ export type TimerProps = {
   expiredLabel?: string | null;
   /** Fires once when the countdown reaches zero. Display only; never advance phases from this. */
   onExpire?: () => void;
+  /** Milliseconds left while the countdown is paused (state.timerPausedMs). Shows frozen digits + "Paused". */
+  pausedMs?: number | null;
   className?: string;
 };
 
@@ -34,7 +36,7 @@ function fmt(ms: number) {
 }
 
 /** Countdown synced to server time. mm:ss in VT323; pulses and turns amber->red in the last seconds. */
-export function Timer({ endsAt, serverOffsetMs = 0, size = "md", label, expiredLabel = "Time's up", warnAt = 10, onExpire, className }: TimerProps) {
+export function Timer({ endsAt, serverOffsetMs = 0, size = "md", label, expiredLabel = "Time's up", warnAt = 10, onExpire, pausedMs, className }: TimerProps) {
   const [now, setNow] = useState<number | null>(null);
   const expiredFor = useRef<string | null>(null);
   const onExpireRef = useRef(onExpire);
@@ -63,6 +65,20 @@ export function Timer({ endsAt, serverOffsetMs = 0, size = "md", label, expiredL
       onExpireRef.current?.();
     }
   }, [expired, endsAt]);
+
+  const paused = pausedMs != null && !endsAt;
+  if (paused) {
+    return (
+      <div className={cx(s.timer, s[size], s.paused, className)} role="timer" aria-label={`Timer paused with ${fmt(pausedMs)} left`}>
+        <span className={s.digits} aria-hidden>
+          {fmt(pausedMs)}
+        </span>
+        <span className={s.label} aria-hidden>
+          Paused
+        </span>
+      </div>
+    );
+  }
 
   const text = hasTimer ? fmt(remaining) : "--:--";
   const ariaText = !hasTimer

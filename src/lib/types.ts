@@ -230,6 +230,8 @@ export type StateBase = {
   phase: Phase;
   phaseStartedAt: ISODate;
   phaseEndsAt: ISODate | null;
+  /** Set while the countdown is paused: milliseconds left (phaseEndsAt is then null). */
+  timerPausedMs: number | null;
   /** Server clock at response time, for client clock-offset correction. */
   serverNow: ISODate;
   epoch: number;
@@ -347,8 +349,8 @@ export type PhaseRequest = { phase: Phase; durationSec?: number };
 export type PhaseResponse = { phase: Phase; phaseEndsAt: ISODate | null; warning?: string };
 
 /** POST /api/admin/timer: addSec extends (from now if no timer/expired); setSec sets from now (0 clears). */
-export type TimerRequest = { addSec?: number; setSec?: number };
-export type TimerResponse = { phaseEndsAt: ISODate | null };
+export type TimerRequest = { addSec?: number; setSec?: number; action?: "pause" | "resume" | "end" };
+export type TimerResponse = { phaseEndsAt: ISODate | null; timerPausedMs: number | null };
 
 /** POST /api/admin/reveal  (REVEAL only) */
 /** fromStep: the step the admin saw when clicking; makes a double click a no-op instead of skipping a place. */

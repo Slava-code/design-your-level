@@ -53,7 +53,7 @@ export async function askFollowups(d: DesignInput): Promise<{ questions: string[
     const questions = d.level.includes("MOCK_CLEAR")
       ? []
       : [
-          "What does the first room look like when the player walks in?",
+          "What does the starting area look like when the player walks in?",
           "How does the player know the enemy is close before they see it?",
           "Where exactly is the ability hidden?",
         ];

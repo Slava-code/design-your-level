@@ -9,6 +9,7 @@ export type EventRow = {
   phase: Phase;
   phase_started_at: Date;
   phase_ends_at: Date | null;
+  timer_paused_ms: number | null;
   epoch: number;
   reveal_step: number;
   voting_frozen_at: Date | null;
@@ -16,7 +17,7 @@ export type EventRow = {
   now: Date;
 };
 
-export const EVENT_SQL = "SELECT phase, phase_started_at, phase_ends_at, epoch, reveal_step, voting_frozen_at, ranking, now() AS now FROM event_state WHERE id = 1";
+export const EVENT_SQL = "SELECT phase, phase_started_at, phase_ends_at, timer_paused_ms, epoch, reveal_step, voting_frozen_at, ranking, now() AS now FROM event_state WHERE id = 1";
 
 export async function getEvent(): Promise<EventRow> {
   const row = await q1<Row>(EVENT_SQL);

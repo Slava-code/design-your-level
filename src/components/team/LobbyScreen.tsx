@@ -6,7 +6,7 @@ import { RoomPath } from "./RoomPath";
 import s from "./shell.module.css";
 
 const ASPECTS = [
-  { k: "level", t: "Level", d: "The space: start room, 3 rooms, exit." },
+  { k: "level", t: "Level", d: "The space: from the start to the exit." },
   { k: "enemy", t: "Enemy", d: "What hunts you, and how you know." },
   { k: "ability", t: "Ability", d: "What you find, and what it unlocks." },
   { k: "puzzle", t: "Puzzle", d: "What stands between you and the exit." },
@@ -33,7 +33,7 @@ export function LobbyScreen({ state }: { state: TeamState }) {
           Your mission
         </h2>
         <p className={s.briefLead}>
-          Get the player from the <b>start room</b> to the <b>exit</b> through <b>3 rooms</b>. Pick a feeling, then design
+          Get the player from the <b>start</b> of the level to the <b>exit</b>. Pick a feeling, then design
           four things. For each one: <em>how does it create your feeling?</em>
         </p>
         <p className={s.typist}>

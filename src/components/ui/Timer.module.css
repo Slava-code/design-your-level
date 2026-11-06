@@ -70,3 +70,26 @@
   40% { transform: scale(0.97) rotate(1deg); }
   100% { transform: scale(1) rotate(0); }
 }
+
+/* Paused: frozen digits, dimmed, with a slow blink so the room can tell it is stopped. */
+.paused .digits {
+  opacity: 0.55;
+  animation: pausedBlink 1.6s steps(2, jump-none) infinite;
+}
+.paused .label {
+  color: var(--amber, #ffc56b);
+}
+@keyframes pausedBlink {
+  0% { opacity: 0.85; }
+  100% { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .paused .digits { animation: none; }
+}
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}

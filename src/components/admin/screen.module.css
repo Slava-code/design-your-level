@@ -895,3 +895,82 @@
     opacity: 0.7;
   }
 }
+
+/* "Show, don't tell!" reminder under the Design title on the projector. */
+.showDontTell {
+  margin-top: 0.4em;
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.12em 0.5em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 3.2vw, 3.6rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--ink, #1a120a);
+  background: var(--paper, #e9dcbc);
+  border: 4px double var(--ink, #1a120a);
+  border-radius: 8px;
+  transform: rotate(-1.5deg);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Local copies of global keyframes: CSS Modules scope animation names per file. */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(12px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.4) rotate(-6deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(1deg);
+  }
+  75% {
+    transform: scale(1.04) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-4deg);
+  }
+  40% {
+    transform: rotate(3.5deg);
+  }
+  60% {
+    transform: rotate(-2.5deg);
+  }
+  80% {
+    transform: rotate(1.5deg);
+  }
+}

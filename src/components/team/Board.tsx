@@ -70,7 +70,7 @@ const DRAW_T = [3, 9, 22];
 const TIPS = [
   "Meanwhile: is it clear how the enemy warns the player?",
   "Meanwhile: what does solving the puzzle change in the room?",
-  "Meanwhile: say what each room is made of. Light, materials, size.",
+  "Meanwhile: say what the place is made of. Light, materials, size.",
   "Meanwhile: does the ability help with the puzzle or the enemy?",
   "You can keep editing your design while the artist works.",
 ];

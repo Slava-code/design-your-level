@@ -117,3 +117,7 @@ CREATE TABLE IF NOT EXISTS event_archive (
   epoch           int NOT NULL,
   snapshot        jsonb NOT NULL
 );
+
+-- Added 2026-11-06: paused countdown. While paused, phase_ends_at is NULL and this holds the
+-- milliseconds that were left; Resume sets phase_ends_at = now() + this.
+ALTER TABLE event_state ADD COLUMN IF NOT EXISTS timer_paused_ms int;
