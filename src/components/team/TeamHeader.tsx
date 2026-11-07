@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Phase, RenameResponse, TeamState } from "@/lib/types";
 import { BudgetMeter, ConfirmDialog, Timer, useToast, cx } from "@/components/ui";
 import { post } from "./api";
+import { flushDraft } from "./draft";
 import s from "./shell.module.css";
 
 const PHASE_LABEL: Record<Phase, string> = {
@@ -29,6 +30,7 @@ export function TeamHeader({ state, serverOffsetMs, refresh, onLogout }: Props) 
 
   async function logout() {
     setLeaving(true);
+    await flushDraft(); // push the last keystrokes before the session cookie goes
     const r = await post("/api/leave");
     if (!r.ok) {
       setLeaving(false);

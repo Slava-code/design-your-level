@@ -1285,3 +1285,11 @@
     transform: rotate(1.5deg);
   }
 }
+
+/* Autosave state next to the cost line */
+.saveState {
+  color: var(--text-muted);
+}
+.saveState[data-state="local"] {
+  color: var(--amber, #ffc56b);
+}

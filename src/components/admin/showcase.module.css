@@ -1,0 +1,214 @@
+/* Projector: one design full screen for the team to present. Sized in vw/vh for a 16:9 projector. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-confetti) + 10); /* above the reveal confetti, so the text stays readable */
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+  padding: 3vh 2.5vw 2vh;
+  background: radial-gradient(ellipse at 30% 20%, #12301c, #030a06 70%);
+  animation: show-in 220ms ease-out both;
+}
+@keyframes show-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+}
+.name {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: min(3.6vw, 6.4vh);
+  line-height: 1.05;
+  color: var(--text-strong);
+}
+.nameText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ribbon {
+  flex: none;
+  padding: 0.25em 0.6em;
+  border-radius: 6px;
+  font-family: var(--font-type);
+  font-weight: 400;
+  font-size: 0.42em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.r1 {
+  background: var(--amber);
+  color: var(--ink);
+}
+.r2 {
+  background: var(--parch);
+  color: var(--ink);
+}
+.r3 {
+  background: #c08a52;
+  color: var(--ink);
+}
+.controls {
+  flex: none;
+  display: flex;
+  gap: 0.8vw;
+}
+.ctl {
+  padding: 0.5em 1em;
+  border: 2px solid var(--line-strong);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-terminal);
+  font-size: min(1.3vw, 2.4vh);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ctl:hover,
+.ctl:focus-visible {
+  border-color: var(--phos);
+  color: var(--phos);
+}
+.close {
+  border-color: var(--phos);
+  color: var(--phos);
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 2.4vw;
+  animation: show-in 260ms ease-out both;
+}
+.art {
+  margin: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.art img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 2px solid var(--line-strong);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+.noImg {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--line-strong);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-terminal);
+  font-size: 2vw;
+}
+/* The team's words, on parchment, scrolling if they wrote a lot. */
+.text {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2.4vh 1.6vw;
+  border-radius: 12px;
+  background: var(--parch);
+  color: var(--ink);
+  font-size: min(1.25vw, 2.25vh);
+  line-height: 1.45;
+}
+.tags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  margin-bottom: 1.1em;
+}
+.tag {
+  margin: 0;
+  padding: 0.45em 0.8em;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: rgba(255, 252, 243, 0.55);
+  font-weight: 600;
+}
+.tagFeel {
+  background: var(--ink);
+  color: var(--parch);
+}
+.key {
+  margin-right: 0.4em;
+  font-family: var(--font-type);
+  font-weight: 400;
+  font-size: 0.8em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.aspects {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.aspect {
+  --c: var(--ink);
+  padding-left: 0.8em;
+  border-left: 5px solid var(--c);
+}
+.aspect[data-aspect="level"] {
+  --c: #b97a1e;
+}
+.aspect[data-aspect="enemy"] {
+  --c: #c0392b;
+}
+.aspect[data-aspect="ability"] {
+  --c: #1f8a46;
+}
+.aspect[data-aspect="puzzle"] {
+  --c: #2c7bb6;
+}
+.aspectName {
+  font-family: var(--font-type);
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.aspectText {
+  margin: 0.15em 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.blank {
+  opacity: 0.55;
+  font-style: italic;
+}
+.hint {
+  flex: none;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-terminal);
+  font-size: min(1vw, 1.9vh);
+  color: var(--text-muted);
+}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Confetti, Podium, StatusPill, Timer, Wordmark, cx, type PodiumEntry } from "@/components/ui";
 import type { AdminState, AdminTeamRow } from "@/lib/types";
 import { activityPill, PHASE_LABEL } from "./lib";
+import { Showcase } from "./Showcase";
 import { useLiveState, useNow } from "./useLiveState";
 import s from "./screen.module.css";
 
@@ -313,6 +314,8 @@ function useFitWidth(ratio: number) {
 function Reveal({ state }: { state: AdminState }) {
   const fit = useFitWidth(1.58);
   const rv = state.reveal;
+  const [open, setOpen] = useState<number | null>(null);
+  const shown = state.showcase ?? [];
   if (!rv || rv.maxStep === 0) {
     return (
       <div className={s.centerMsg}>
@@ -353,9 +356,21 @@ function Reveal({ state }: { state: AdminState }) {
       <div className={s.podiumArea} ref={fit.ref}>
         <div className={s.podiumBox} style={fit.width ? { width: fit.width } : undefined}>
           {/* The trophy and the winner's name live in the headline above, so the card shows only art + score. */}
-          <Podium entries={entries} revealStep={podiumStep} trophy={false} hideWinnerName />
+          <Podium
+            entries={entries}
+            revealStep={podiumStep}
+            trophy={false}
+            hideWinnerName
+            onSelect={(place) => {
+              const e = rv.revealed.find((x) => x.rank === place);
+              if (e && shown.some((x) => x.slot === e.slot)) setOpen(e.slot);
+            }}
+          />
         </div>
       </div>
+      {open != null && shown.some((x) => x.slot === open) && (
+        <Showcase entries={[...shown].sort((a, b) => (a.place ?? 9) - (b.place ?? 9))} slot={open} onChange={setOpen} onClose={() => setOpen(null)} />
+      )}
     </div>
   );
 }
@@ -374,6 +389,10 @@ function Closed({ state }: { state: AdminState }) {
   // Storyboards are 3:2 and height-limited; size the gallery so the cards sit together instead of
   // spreading to the screen edges (about 0.82 of each row is image, the rest caption and gap).
   const fit = useFitWidth((cols * 1.5 * 0.82) / rows);
+  const [open, setOpen] = useState<number | null>(null);
+  const showcase = new Map((state.showcase ?? []).map((e) => [e.slot, e]));
+  // Same order as the gallery, so the arrow keys walk the cards left to right.
+  const ordered = subs.map((t) => showcase.get(t.slot)).filter((e): e is NonNullable<typeof e> => !!e);
   return (
     <div className={s.closed}>
       <div className={s.closedHead}>
@@ -394,10 +413,16 @@ function Closed({ state }: { state: AdminState }) {
             return (
               <figure key={t.slot} className={cx(s.card, place === 1 && s.cardWin)} style={{ ["--i" as string]: i }}>
                 <div className={s.cardImg}>
-                  <div className={s.cardFit}>
+                  <button
+                    type="button"
+                    className={cx(s.cardFit, s.cardBtn)}
+                    onClick={() => showcase.has(t.slot) && setOpen(t.slot)}
+                    disabled={!showcase.has(t.slot)}
+                    aria-label={`Show ${t.name}'s design`}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={t.submittedImageUrl!} alt={`Storyboard by ${t.name}`} />
-                  </div>
+                  </button>
                 </div>
                 <figcaption className={s.cardName}>
                   {place && <span className={cx(s.ribbon, s[`r${place}`])}>{place === 1 ? "Winner" : place === 2 ? "2nd" : "3rd"}</span>}
@@ -409,6 +434,8 @@ function Closed({ state }: { state: AdminState }) {
         </div>
         </div>
       )}
+      {n > 0 && ordered.length > 0 && <p className={s.galleryHint}>Click a storyboard to show it full screen</p>}
+      {open != null && showcase.has(open) && <Showcase entries={ordered} slot={open} onChange={setOpen} onClose={() => setOpen(null)} />}
     </div>
   );
 }

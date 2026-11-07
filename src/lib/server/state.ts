@@ -8,6 +8,7 @@ import type {
   FeedItem,
   GenerationStatus,
   Scores,
+  ShowcaseEntry,
   StateBase,
   TeamActivity,
   TeamState,
@@ -78,6 +79,7 @@ export function buildTeamState(bundle: { event: EventRow; team: Row; gens: Row[]
       imageUrl: a.image_url ?? null,
       panelCaptions: Array.isArray(a.panel_captions) ? a.panel_captions : null,
       myVote: a.level == null ? null : ({ level: a.level, enemy: a.enemy, ability: a.ability, puzzle: a.puzzle } as Scores),
+      myDraft: (team.vote_draft as Record<string, AssignedDesign["myDraft"]> | null)?.[String(a.generation_id)] ?? null,
     }));
     voting = { assigned: list, done: list.filter((x) => x.myVote).length, total: list.length };
   }
@@ -185,8 +187,26 @@ export async function buildAdminState(view: "admin" | "screen", since: number | 
     },
     reveal: revealState(event),
     ranking: showRanking ? rankingOf(event) : null,
+    showcase: showcaseOf(event),
     slotsConfigured: slotCount(),
   };
+}
+
+/** Submitted designs for the projector to open full screen. During REVEAL only places already revealed. */
+function showcaseOf(event: EventRow): ShowcaseEntry[] | null {
+  const rv = revealState(event);
+  if (!rv) return null;
+  const revealed = new Set(rv.revealed.map((e) => e.slot));
+  return rankingOf(event)
+    .filter((r) => event.phase === "CLOSED" || revealed.has(r.slot))
+    .map((r) => ({
+      slot: r.slot,
+      name: r.name,
+      place: revealed.has(r.slot) ? r.rank : null,
+      imageUrl: r.imageUrl,
+      panelCaptions: r.panelCaptions,
+      inputs: r.inputs,
+    }));
 }
 
 const lastSeenWrites = new Map<number, number>();

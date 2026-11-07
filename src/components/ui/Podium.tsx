@@ -28,6 +28,8 @@ export type PodiumProps = {
   trophy?: boolean;
   /** Hide the winner's name under its card (when a headline already shows it). Default false. */
   hideWinnerName?: boolean;
+  /** Makes each revealed storyboard a button (e.g. open it full screen for the team to present). */
+  onSelect?: (place: 1 | 2 | 3) => void;
   className?: string;
 };
 
@@ -48,6 +50,7 @@ export function Podium({
   trophySrc = "/art/trophy.png",
   trophy = true,
   hideWinnerName = false,
+  onSelect,
   className,
 }: PodiumProps) {
   const [trophyOk, setTrophyOk] = useState(true);
@@ -93,14 +96,25 @@ export function Podium({
                         )}
                       </div>
                     )}
-                    <div className={s.frame}>
-                      {e?.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={e.imageUrl} alt={`Storyboard by ${e.name}`} />
-                      ) : (
-                        <div className={s.noImg} aria-hidden />
-                      )}
-                    </div>
+                    {e && onSelect ? (
+                      <button type="button" className={cx(s.frame, s.frameBtn)} onClick={() => onSelect(place)} aria-label={`Show ${e.name}'s design`}>
+                        {e.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={e.imageUrl} alt={`Storyboard by ${e.name}`} />
+                        ) : (
+                          <div className={s.noImg} aria-hidden />
+                        )}
+                      </button>
+                    ) : (
+                      <div className={s.frame}>
+                        {e?.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={e.imageUrl} alt={`Storyboard by ${e.name}`} />
+                        ) : (
+                          <div className={s.noImg} aria-hidden />
+                        )}
+                      </div>
+                    )}
                     {!(winner && hideWinnerName) && <div className={s.name}>{e ? e.name : "No entry"}</div>}
                     {e && (
                       <div className={s.score}>

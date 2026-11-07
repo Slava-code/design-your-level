@@ -152,3 +152,11 @@ SELECT a.epoch,
        (SELECT COALESCE(sum((t->>'spend_usd')::float8), 0) FROM jsonb_array_elements(COALESCE(a.snapshot->'teams', '[]'::jsonb)) t)
   FROM event_archive a
 ON CONFLICT (id) DO NOTHING;
+
+-- Added 2026-11-07: server copy of each team's unsent design form (autosaved while typing), so a
+-- reload, logout, team switch or another device never loses it. {fields, refs}; last write wins.
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS draft jsonb;
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS draft_updated_at timestamptz;
+-- Partly-scored designs during VOTING ({generation id: {level, enemy, ability, puzzle}} with nulls), so a
+-- reload or device switch keeps taps that don't yet form a full vote. Full votes still go to votes.
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS vote_draft jsonb;

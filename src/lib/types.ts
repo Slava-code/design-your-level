@@ -167,6 +167,8 @@ export type AssignedDesign = {
   panelCaptions: string[] | null;
   /** This team's vote, if cast (can be changed until VOTING ends). */
   myVote: Scores | null;
+  /** Scores tapped so far when the vote isn't complete yet (autosaved), else null. */
+  myDraft: Partial<Record<keyof Scores, number | null>> | null;
 };
 
 export type RankingEntry = {
@@ -181,6 +183,17 @@ export type RankingEntry = {
   score: number | null;
   ratings: number;
   categoryMeans: Scores | null;
+};
+
+/** A submitted design the projector can open full screen (REVEAL: revealed podium only; CLOSED: all). */
+export type ShowcaseEntry = {
+  slot: number;
+  name: string;
+  /** Podium place once revealed, else null. */
+  place: number | null;
+  imageUrl: string | null;
+  panelCaptions: string[] | null;
+  inputs: DesignFields;
 };
 
 export type RevealState = {
@@ -286,6 +299,8 @@ export type AdminState = StateBase & {
   reveal: RevealState | null;
   /** view=admin in REVEAL/CLOSED only: the full ranking (never sent to view=screen). */
   ranking: RankingEntry[] | null;
+  /** REVEAL/CLOSED: designs the projector can open full screen (no scores; unrevealed places withheld). */
+  showcase: ShowcaseEntry[] | null;
   /** Number of team slots configured (TEAM_CODES length). */
   slotsConfigured: number;
 };
@@ -305,6 +320,10 @@ export type OkResponse = { ok: true };
 /** POST /api/team/name  (LOBBY/DESIGN only) */
 export type RenameRequest = { name: string }; // 1-32 chars after trim + whitespace collapse
 export type RenameResponse = { team: TeamSummary };
+/** GET /api/team/draft: the team's autosaved (unsent) design form, shared across its devices. */
+export type DraftRefSaved = { id: string; url: string; field: RefField; name?: string };
+export type DraftResponse = { draft: { fields: DesignFields; refs: DraftRefSaved[] } | null; updatedAt: string | null };
+export type DraftSaveResponse = { updatedAt: string | null };
 
 /**
  * POST /api/upload: Vercel Blob client-upload token route. Use from the browser:

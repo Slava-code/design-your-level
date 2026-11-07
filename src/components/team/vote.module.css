@@ -375,3 +375,17 @@
     max-width: 560px;
   }
 }
+
+/* A long genre/feeling/style answer: full-width rounded box with the label inline, not a stretched pill. */
+.tag[data-long] {
+  display: block;
+  flex: 1 1 100%;
+  border-radius: var(--r-md);
+  padding: 0.55em 0.85em;
+  line-height: 1.45;
+}
+.tag[data-long] .tagKey {
+  margin-right: 0.35em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

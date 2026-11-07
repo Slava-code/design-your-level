@@ -166,6 +166,28 @@ async function main() {
   expect(sA.role === "team" && sA.team.name === "The Night Shift" && sA.canRename, "other device sees the new name");
   expect(sA.nextGenerateAsksQuestions === true && typeof sA.uploadPrefix === "string" && sA.uploadPrefix.includes(`ev${epoch1}/refs/slot1/`), "team state has uploadPrefix and first-generation flag");
 
+  // Draft autosave: one server copy per team, shared by its devices; foreign image links dropped.
+  r = await A.get("/api/team/draft");
+  expect(r.status === 200 && r.json.draft === null, "no draft before typing");
+  r = await A.post("/api/team/draft", {
+    fields: { feeling: "lonely, uneasy ", level: "x".repeat(5000), evil: "nope" },
+    refs: [
+      { id: "r1", field: "level", url: `https://example.com/${sA.uploadPrefix}a.png` },
+      { id: "r2", field: "nope", url: "https://x.public.blob.vercel-storage.com/a.png" },
+    ],
+  });
+  expect(r.status === 200 && r.json.updatedAt, "draft saved");
+  r = await A2.get("/api/team/draft");
+  const dr = r.json.draft;
+  expect(
+    dr && dr.fields.feeling === "lonely, uneasy " && dr.fields.level.length < 5000 && dr.fields.genre === "" && !("evil" in dr.fields) && dr.refs.length === 0,
+    "other device reads the draft: kept as typed, capped, unknown keys and foreign refs dropped",
+  );
+  r = await B.get("/api/team/draft");
+  expect(r.status === 200 && r.json.draft === null, "another team can't see the draft");
+  r = await X.get("/api/team/draft");
+  expect(r.status === 401, "draft without session is 401");
+
   // Phase rules
   r = await A.post("/api/generate", { design: design(), references: [], askQuestions: false });
   expect(r.status === 409 && r.json.code === "phase", "generate in LOBBY is rejected (phase)");

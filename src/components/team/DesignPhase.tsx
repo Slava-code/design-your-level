@@ -14,7 +14,7 @@ import {
 } from "@/lib/types";
 import { Button, ConfirmDialog, Tabs, useToast, cx } from "@/components/ui";
 import { post, cr } from "./api";
-import { FIELD_LABEL, missingFields, useDraft, type DraftRef } from "./draft";
+import { FIELD_LABEL, missingFields, useDraft, type DraftRef, type SaveStatus } from "./draft";
 import { uploadReference, ImagePrepError } from "./images";
 import { DesignForm, type Upload } from "./DesignForm";
 import { Board } from "./Board";
@@ -23,6 +23,13 @@ import s from "./design.module.css";
 
 type Props = { state: TeamState; serverOffsetMs: number; refresh: () => Promise<void> };
 type Tab = "design" | "board";
+
+const SAVE_LABEL: Record<SaveStatus, string> = {
+  loading: "",
+  saving: "Saving...",
+  saved: "Draft saved",
+  local: "Offline: saved on this device",
+};
 
 let uid = 0;
 const nextId = () => `u${Date.now().toString(36)}${(uid++).toString(36)}`;
@@ -45,7 +52,7 @@ const narrow = () => typeof window !== "undefined" && window.matchMedia("(max-wi
 export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
   const toast = useToast();
   const { team, generations } = state;
-  const { draft, setDraft, setField, loaded } = useDraft(state.epoch, team.slot);
+  const { draft, setDraft, setField, loaded, saveStatus } = useDraft(state.epoch, team.slot);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [tab, setTab] = useState<Tab>(generations.length ? "board" : "design");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -391,7 +398,12 @@ export function DesignPhase({ state, serverOffsetMs, refresh }: Props) {
                 ) : (
                   <span className={s.genNote}>You can keep editing while it works.</span>
                 )}
-                <span className={s.cost}>up to {cr(estimate)}</span>
+                <span className={s.cost}>
+                  <span className={s.saveState} data-state={saveStatus} role="status">
+                    {SAVE_LABEL[saveStatus]}
+                  </span>
+                  {SAVE_LABEL[saveStatus] ? " · " : ""}up to {cr(estimate)}
+                </span>
               </div>
             </div>
           </div>

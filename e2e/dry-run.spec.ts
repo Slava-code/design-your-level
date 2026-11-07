@@ -240,6 +240,25 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
     await expect(p.getByText("Needed. A short line is fine.").first()).toBeVisible();
   }
 
+  // Autosave: what a team typed survives a reload and shows up on a teammate's new device.
+  {
+    const p = teams[2].page;
+    const typed = "A rusty knight who only attacks at night (draft)";
+    await field(p, "Enemy").fill(typed);
+    await expect(p.getByText("Draft saved")).toBeVisible({ timeout: 10_000 });
+    await p.reload();
+    await expect(field(p, "Enemy")).toHaveValue(typed, { timeout: 15_000 });
+
+    const ctx2 = await browser.newContext({ viewport: LAPTOP });
+    const p2 = await ctx2.newPage();
+    await p2.goto("/");
+    await p2.getByLabel("Your team code").fill(CODES[2]);
+    await p2.getByRole("button", { name: "Join" }).click();
+    await p2.getByRole("button", { name: "Let's go" }).click();
+    await expect(field(p2, "Enemy")).toHaveValue(typed, { timeout: 15_000 });
+    await ctx2.close();
+  }
+
   // Every team: first generation (with follow-up questions), then submit.
   await Promise.all(teams.map((t) => firstGeneration(t)));
   await expect(screen.getByText(`${N} of ${N} submitted`)).toBeVisible();
@@ -420,6 +439,27 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
 
   // Deterministic scores so the podium is known: team 1 > team 2 > team 3 > everyone else.
   const scoreFor = (slot: number) => Math.max(1, 6 - slot);
+
+  // Partly-scored designs are autosaved: two taps survive a reload (and the screen resumes there).
+  {
+    const t = teams[6];
+    const p = t.page;
+    await expect(p.getByRole("heading", { name: "Rate 4 designs" })).toBeVisible();
+    const v = scoreFor(plans.get(t.slot)![0]);
+    const radio = (k: string) => p.getByRole("group", { name: new RegExp(`^${k}`) }).getByRole("radio", { name: new RegExp(`^${v},`) });
+    for (const k of ["Level", "Enemy"]) {
+      await p
+        .getByRole("group", { name: new RegExp(`^${k}`) })
+        .locator("label", { has: p.getByRole("radio", { name: new RegExp(`^${v},`) }) })
+        .click();
+    }
+    await expect(p.getByText("2 left to score")).toBeVisible();
+    await p.waitForTimeout(1200); // the partial save is sent 350 ms after the last tap
+    await p.reload();
+    await expect(radio("Level")).toBeChecked({ timeout: 15_000 });
+    await expect(radio("Enemy")).toBeChecked();
+    await expect(p.getByText("2 left to score")).toBeVisible();
+  }
   await Promise.all(
     teams.map(async (t) => {
       const p = t.page;
@@ -478,10 +518,33 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
   await expect(admin.getByText("The winner is on screen")).toBeVisible();
   await shot(screen, "screen-reveal-winner");
 
+  // Clicking a podium storyboard opens that design full screen so the team can present it.
+  await screen.getByRole("button", { name: `Show ${t1.name}'s design` }).click();
+  {
+    const show = screen.getByRole("dialog", { name: `${t1.name}'s design` });
+    await expect(show).toBeVisible();
+    await expect(show.getByText("Winner", { exact: true })).toBeVisible();
+    await expect(show.getByText("Puzzle", { exact: true })).toBeVisible();
+    await expect(show.getByRole("img", { name: `Storyboard by ${t1.name}` })).toBeVisible();
+    await shot(screen, "screen-showcase-winner");
+    await screen.keyboard.press("Escape");
+    await expect(show).toBeHidden();
+  }
+
   // ------------------------------------------------------------------ CLOSED
   await startPhase(admin, "End and show the gallery", "CLOSED");
   await expect(screen.getByRole("heading", { name: "What did the AI get wrong?" })).toBeVisible();
   for (const t of teams) await expect(t.page.getByText("That's a wrap")).toBeVisible();
+
+  // Any gallery storyboard opens full screen; arrow keys move to the next design.
+  await screen.getByRole("button", { name: `Show ${teams[3].name}'s design` }).click();
+  await expect(screen.getByRole("dialog", { name: `${teams[3].name}'s design` })).toBeVisible();
+  await screen.keyboard.press("ArrowRight");
+  await expect(screen.getByRole("dialog", { name: `${teams[3].name}'s design` })).toBeHidden();
+  await expect(screen.getByRole("dialog")).toBeVisible();
+  await shot(screen, "screen-showcase-gallery");
+  await screen.getByRole("button", { name: "Close" }).click();
+  await expect(screen.getByRole("dialog")).toBeHidden();
 
   // No code anywhere in what the admin, projector or team browsers render.
   for (const p of [admin, screen, ...teams.map((t) => t.page)]) {

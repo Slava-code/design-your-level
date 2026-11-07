@@ -28,7 +28,8 @@ type Props = { state: TeamState; refresh: () => Promise<void> };
 export function VotingScreen({ state, refresh }: Props) {
   const toast = useToast();
   const assigned = state.voting?.assigned ?? [];
-  const [idx, setIdx] = useState(0);
+  // Start at the first design not fully scored yet (after a reload, pick up where you left off).
+  const [idx, setIdx] = useState(() => Math.max(0, assigned.findIndex((a) => !a.myVote)));
   const [scores, setScores] = useState<Record<string, Partial4>>({});
   const [save, setSave] = useState<Record<string, SaveState>>({});
   const timers = useRef<Record<string, number>>({});
@@ -41,7 +42,7 @@ export function VotingScreen({ state, refresh }: Props) {
       const next = { ...cur };
       for (const a of assigned) {
         if (!next[a.target]) {
-          next[a.target] = a.myVote ? { ...(a.myVote as Partial4) } : { ...EMPTY };
+          next[a.target] = a.myVote ? { ...(a.myVote as Partial4) } : { ...EMPTY, ...(a.myDraft as Partial<Partial4> | null) };
           changed = true;
         }
       }
@@ -79,13 +80,23 @@ export function VotingScreen({ state, refresh }: Props) {
     if (r.error.code === "phase") void refresh();
   }
 
+  // Partly-scored designs are kept on the server too, so a reload or another device keeps the taps.
+  async function sendDraft(target: string, sc: Partial4, attempt = 0) {
+    const r = await post("/api/vote/draft", { target, scores: sc });
+    if (!r.ok && r.status === 0 && attempt < 3) {
+      timers.current[target] = window.setTimeout(() => void sendDraft(target, sc, attempt + 1), 1500 * (attempt + 1));
+    }
+  }
+
   function setScore(target: string, k: keyof Scores, v: Score) {
     const next = { ...(scores[target] ?? EMPTY), [k]: v };
     setScores((cur) => ({ ...cur, [target]: next }));
+    window.clearTimeout(timers.current[target]);
     if (complete(next)) {
-      window.clearTimeout(timers.current[target]);
       setSave((cur) => ({ ...cur, [target]: "saving" }));
       timers.current[target] = window.setTimeout(() => void send(target, next), 350);
+    } else {
+      timers.current[target] = window.setTimeout(() => void sendDraft(target, next), 350);
     }
   }
 
@@ -221,6 +232,9 @@ function firstUnrated(assigned: AssignedDesign[], save: Record<string, SaveState
   return i === -1 ? fallback : i;
 }
 
+/** Long answers don't fit a pill: they get a full-width box instead. */
+const long = (t: string) => t.length > 36;
+
 function DesignCard({ d, total }: { d: AssignedDesign; total: number }) {
   const f = d.inputs;
   const rows: { k: "level" | "enemy" | "ability" | "puzzle"; label: string }[] = [
@@ -237,15 +251,19 @@ function DesignCard({ d, total }: { d: AssignedDesign; total: number }) {
           <span className={s.cardOf}> / {total}</span>
         </span>
         <div className={s.tags}>
-          {f.genre && <span className={s.tag}>{f.genre}</span>}
+          {f.genre && (
+            <span className={s.tag} data-long={long(f.genre) || undefined}>
+              {f.genre}
+            </span>
+          )}
           {f.feeling && (
-            <span className={cx(s.tag, s.tagFeel)}>
+            <span className={cx(s.tag, s.tagFeel)} data-long={long(f.feeling) || undefined}>
               <span className={s.tagKey}>Feeling</span> {f.feeling}
             </span>
           )}
           {f.artStyle && (
-            <span className={s.tag}>
-              <span className={s.tagKey}>Style</span> {f.artStyle}
+            <span className={s.tag} data-long={long(f.artStyle) || undefined}>
+              <span className={s.tagKey}>Art style</span> {f.artStyle}
             </span>
           )}
         </div>

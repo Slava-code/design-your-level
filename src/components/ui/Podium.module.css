@@ -322,3 +322,17 @@
     transform: rotate(360deg);
   }
 }
+
+/* Clickable storyboard (projector: open the design full screen) */
+.frameBtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  cursor: zoom-in;
+}
+.frameBtn:hover,
+.frameBtn:focus-visible {
+  outline: 3px solid var(--phos);
+  outline-offset: 3px;
+}
