@@ -1016,3 +1016,24 @@ button.teamName:focus-visible .pencil {
   font-size: var(--fs-md);
   color: var(--text);
 }
+
+/* Team header: log out (switch team on a shared device) */
+.logout {
+  flex: none;
+  min-height: 36px;
+  padding: 0 0.8em;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-terminal);
+  font-size: var(--fs-md);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.logout:hover,
+.logout:focus-visible {
+  border-color: var(--phos);
+  color: var(--phos);
+}

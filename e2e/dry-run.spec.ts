@@ -206,6 +206,21 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
     teams[1].name = RENAME_2;
   }
 
+  // Log out from the header (switch team on a shared device), then rejoin: the team and its name are kept.
+  {
+    const p = teams[1].page;
+    await p.getByRole("button", { name: "Log out", exact: true }).click();
+    const dlg = p.getByRole("dialog");
+    await expect(dlg).toContainText("Log out of Team 2?");
+    await dlg.getByRole("button", { name: "Log out" }).click();
+    await expect(p.getByText("You logged out of Team 2")).toBeVisible();
+    await expect(p.getByLabel("Your team code")).toBeVisible();
+    await p.getByLabel("Your team code").fill(CODES[1]);
+    await p.getByRole("button", { name: "Join" }).click();
+    await expect(p.getByRole("button", { name: new RegExp(`Team name: ${RENAME_2}`) })).toBeVisible();
+    await expect(p.getByText("Waiting for the host to start")).toBeVisible();
+  }
+
   // Projector lobby lists every team by name; no code appears anywhere.
   const strip = screen.getByRole("region", { name: "Teams that joined" });
   for (const t of teams) await expect(strip.getByText(t.name, { exact: true })).toBeVisible();

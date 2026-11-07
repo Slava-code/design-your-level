@@ -34,6 +34,7 @@ const PHASE_ANNOUNCE: Record<string, string> = {
 export function TeamApp() {
   const { state, serverOffsetMs, reconnecting, refresh } = useTeamState();
   const [expiredMsg, setExpiredMsg] = useState<string | null>(null);
+  const [leftMsg, setLeftMsg] = useState<string | null>(null);
   const lastTeam = useRef<{ epoch: number; slot: number } | null>(null);
   const [onboarded, setOnboarded] = useState<Record<string, boolean>>({});
 
@@ -45,6 +46,7 @@ export function TeamApp() {
     if (state.role === "team") {
       lastTeam.current = { epoch: state.epoch, slot: (state as TeamState).team.slot };
       setExpiredMsg(null);
+      setLeftMsg(null);
     } else if (state.role === "anon") {
       if (lastTeam.current || state.sessionExpired) {
         setExpiredMsg(
@@ -86,9 +88,10 @@ export function TeamApp() {
     return (
       <>
         <JoinScreen
-          message={expiredMsg}
+          message={expiredMsg ?? leftMsg}
           onJoined={async () => {
             setExpiredMsg(null);
+            setLeftMsg(null);
             await refresh();
           }}
         />
@@ -119,7 +122,17 @@ export function TeamApp() {
         <NameStep state={team} onDone={finishOnboarding} refresh={refresh} />
       ) : (
         <>
-          <TeamHeader state={team} serverOffsetMs={serverOffsetMs} refresh={refresh} />
+          <TeamHeader
+            state={team}
+            serverOffsetMs={serverOffsetMs}
+            refresh={refresh}
+            onLogout={async () => {
+              // A deliberate logout, not an expired session: skip the "session ended" notice.
+              lastTeam.current = null;
+              setLeftMsg(`You logged out of Team ${team.team.slot}. Enter a team code to join.`);
+              await refresh();
+            }}
+          />
           <PhaseBody state={team} serverOffsetMs={serverOffsetMs} refresh={refresh} />
         </>
       )}

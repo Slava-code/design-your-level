@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Phase, RenameResponse, TeamState } from "@/lib/types";
-import { BudgetMeter, Timer, useToast, cx } from "@/components/ui";
+import { BudgetMeter, ConfirmDialog, Timer, useToast, cx } from "@/components/ui";
 import { post } from "./api";
 import s from "./shell.module.css";
 
@@ -14,16 +14,29 @@ const PHASE_LABEL: Record<Phase, string> = {
   CLOSED: "Finished",
 };
 
-type Props = { state: TeamState; serverOffsetMs: number; refresh: () => Promise<void> };
+type Props = { state: TeamState; serverOffsetMs: number; refresh: () => Promise<void>; onLogout: () => Promise<void> };
 
 /** Sticky top bar: team name (editable), phase + timer, budget during DESIGN. */
-export function TeamHeader({ state, serverOffsetMs, refresh }: Props) {
+export function TeamHeader({ state, serverOffsetMs, refresh, onLogout }: Props) {
   const { team, phase, phaseEndsAt, timerPausedMs, canRename } = state;
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(team.name);
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
+  const [confirmOut, setConfirmOut] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+
+  async function logout() {
+    setLeaving(true);
+    const r = await post("/api/leave");
+    if (!r.ok) {
+      setLeaving(false);
+      toast.error(r.error.error);
+      return;
+    }
+    await onLogout();
+  }
 
   useEffect(() => {
     if (!editing) setName(team.name);
@@ -110,6 +123,9 @@ export function TeamHeader({ state, serverOffsetMs, refresh }: Props) {
           ) : (
             <span className={cx(s.phaseDot, phase === "DESIGN" || phase === "VOTING" ? s.live : null)} aria-hidden />
           )}
+          <button type="button" className={s.logout} onClick={() => setConfirmOut(true)}>
+            Log out
+          </button>
         </div>
       </div>
       {phase === "DESIGN" && (
@@ -124,6 +140,20 @@ export function TeamHeader({ state, serverOffsetMs, refresh }: Props) {
           />
         </div>
       )}
+      <ConfirmDialog
+        open={confirmOut}
+        title={`Log out of Team ${team.slot}?`}
+        body={
+          <p>
+            Nothing is lost: {team.name}&apos;s storyboards and credits stay saved, and teammates on other devices stay logged in. You can join again
+            (or join a different team) with a team code.
+          </p>
+        }
+        confirmLabel="Log out"
+        busy={leaving}
+        onConfirm={logout}
+        onCancel={() => setConfirmOut(false)}
+      />
     </header>
   );
 }
