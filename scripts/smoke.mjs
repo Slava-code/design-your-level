@@ -128,7 +128,7 @@ async function main() {
   r = await admin.post("/api/admin/reset-event", { confirm: "nope" });
   expect(r.status === 400, "reset-event needs typed RESET");
   r = await admin.post("/api/admin/reset-event", { confirm: "RESET" });
-  expect(r.status === 200 && r.json.ok && Number.isInteger(r.json.epoch), `reset-event ok (epoch ${r.json.epoch}, ${r.json.blobsDeleted} blobs deleted)`);
+  expect(r.status === 200 && r.json.ok && Number.isInteger(r.json.epoch), `new game started (epoch ${r.json.epoch})`);
   const epoch1 = r.json.epoch;
   let as = await admin.state("admin");
   expect(as.role === "admin" && as.teams.length === 0 && as.phase === "LOBBY" && as.epoch === epoch1, "admin state empty after reset, phase LOBBY");
@@ -461,8 +461,20 @@ async function main() {
   expect(r.status === 409, "CLOSED -> DESIGN jump rejected");
 
   // Reset event: epoch bump logs out teams, keeps this admin
-  r = await admin.post("/api/admin/reset-event", { confirm: "RESET" });
-  expect(r.status === 200 && r.json.epoch === epoch1 + 1 && r.json.blobsDeleted >= 8, `reset-event bumps epoch to ${r.json.epoch} and deletes blobs (${r.json.blobsDeleted})`);
+  r = await admin.post("/api/admin/reset-event", { confirm: "NEW GAME" });
+  expect(r.status === 200 && r.json.epoch === epoch1 + 1 && r.json.previousGame === epoch1, `new game bumps epoch to ${r.json.epoch}, saves game ${r.json.previousGame}`);
+  // The finished game is kept: listed under past games, with its storyboards, podium and working image links.
+  r = await admin.get("/api/admin/games");
+  const pastGame = r.json.games?.find((g) => g.id === epoch1);
+  const liveGame = r.json.games?.find((g) => g.id === epoch1 + 1);
+  expect(r.status === 200 && pastGame && !pastGame.current && pastGame.teams >= 2 && pastGame.generations >= 5 && liveGame?.current, "past game listed with its counts; new game is live");
+  r = await admin.get(`/api/admin/games/${epoch1}`);
+  const pastImg = r.json.generations?.find((g) => g.imageUrl)?.imageUrl;
+  expect(r.status === 200 && r.json.ranking?.length > 0 && r.json.teams?.length >= 2 && pastImg, "past game detail has ranking, teams and storyboards");
+  const imgRes = await fetch(pastImg);
+  expect(imgRes.status === 200, "past game's storyboard image is still in Blob (not deleted)");
+  r = await admin.get(`/api/admin/games/${epoch1 + 1}`);
+  expect(r.status === 404, "live game has no snapshot yet");
   sA = await A.state();
   expect(sA.role === "anon" && sA.sessionExpired === true, "old team cookie is invalid after reset (sessionExpired)");
   r = await B.post("/api/team/name", { name: "ghost" });

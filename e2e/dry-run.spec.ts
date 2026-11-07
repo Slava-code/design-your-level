@@ -475,12 +475,12 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
   }
 
   // ------------------------------------------------------------------ Reset event (admin UI) logs every team out
-  await admin.getByRole("button", { name: "Reset event" }).click();
+  await admin.getByRole("button", { name: "Start new game" }).click();
   const dlg = admin.getByRole("dialog");
-  await dlg.getByRole("textbox").fill("RESET");
-  await dlg.getByRole("button", { name: "Wipe everything" }).click();
+  await dlg.getByRole("textbox").fill("NEW GAME");
+  await dlg.getByRole("button", { name: "Start new game" }).click();
   for (const t of teams) {
-    await expect(t.page.getByText(/event was reset/)).toBeVisible({ timeout: 15_000 });
+    await expect(t.page.getByText(/new game has started/)).toBeVisible({ timeout: 15_000 });
     await expect(t.page.getByLabel("Your team code")).toBeVisible();
   }
   await expect(screen.getByText("Waiting for the first team")).toBeVisible({ timeout: 15_000 });
@@ -489,6 +489,16 @@ test("full classroom dry run: 7 teams, admin, projector", async ({ browser }) =>
   expect(after.phase).toBe("LOBBY");
   expect(after.teams).toHaveLength(0);
   expect(after.totals.totalSpendUsd).toBe(0);
+
+  // The finished game is under Past games, with its podium and storyboards.
+  await admin.getByRole("tab", { name: /Past games/ }).click();
+  const pastRow = admin.getByRole("button", { name: /Winner:/ }).first();
+  await expect(pastRow).toBeVisible({ timeout: 15_000 });
+  await pastRow.click();
+  await expect(admin.getByRole("heading", { name: "Podium" })).toBeVisible({ timeout: 15_000 });
+  await expect(admin.getByRole("img", { name: /^Storyboard by / }).first()).toBeVisible();
+  await shot(admin, "admin-past-games");
+  await admin.getByRole("tab", { name: "Controls" }).click();
 
   expect(apiResponsesScanned).toBeGreaterThan(100);
   expect(leaks, "API responses that contained a code").toEqual([]);

@@ -364,8 +364,47 @@ export type AdminTeamDetailResponse = { team: AdminTeamRow; generations: Generat
 export type ResetBudgetResponse = { team: TeamSummary };
 
 /** POST /api/admin/reset-event  (wipes everything, bumps epoch; re-issues the caller's admin cookie) */
-export type ResetEventRequest = { confirm: "RESET" };
-export type ResetEventResponse = { ok: true; epoch: number; blobsDeleted: number };
+export type ResetEventRequest = { confirm: "RESET" | "NEW GAME" };
+export type ResetEventResponse = { ok: true; epoch: number; previousGame: number };
+
+/** GET /api/admin/games: every game session, newest first. */
+export type GameSummary = {
+  id: number;
+  current: boolean;
+  startedAt: ISODate;
+  endedAt: ISODate | null;
+  teams: number;
+  generations: number;
+  submissions: number;
+  spendUsd: number;
+  winner: string | null;
+};
+export type GamesResponse = { games: GameSummary[] };
+
+/** GET /api/admin/games/[id]: one past game, read from its snapshot. */
+export type PastGeneration = {
+  id: string;
+  slot: number;
+  createdAt: ISODate;
+  status: string;
+  imageUrl: string | null;
+  inputs: DesignFields;
+  questions: string[] | null;
+  answers: string[] | null;
+  imagePrompt: string | null;
+  changesMade: string[] | null;
+  costUsd: number;
+  submitted: boolean;
+};
+export type PastTeam = { slot: number; name: string; spendUsd: number; submittedGenerationId: string | null };
+export type GameDetailResponse = {
+  game: GameSummary;
+  ranking: RankingEntry[];
+  teams: PastTeam[];
+  generations: PastGeneration[];
+  feedCount: number;
+  votes: number;
+};
 
 /** POST /api/dev/team-budget  (NOT in production; admin cookie) — for tests. */
 export type DevTeamBudgetRequest = { slot: number; budgetUsd: number };

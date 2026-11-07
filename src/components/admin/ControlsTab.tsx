@@ -464,41 +464,45 @@ function DangerPanel({ refresh }: { refresh: () => void }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  async function reset() {
+  async function startNew() {
     setBusy(true);
-    const r = await api<ResetEventResponse>("/api/admin/reset-event", { confirm: "RESET" });
+    const r = await api<ResetEventResponse>("/api/admin/reset-event", { confirm: "NEW GAME" });
     setBusy(false);
     if (!r.ok) {
-      toast.error(r.error, { title: "Reset failed" });
+      toast.error(r.error, { title: "New game not started" });
       return;
     }
     setOpen(false);
-    toast.success(`Everything wiped, ${r.data.blobsDeleted} uploaded file(s) deleted. All teams are logged out.`, { title: "Event reset" });
+    toast.success(`Game ${r.data.previousGame} is saved under Past games. All teams are logged out; the same code cards work for game ${r.data.epoch}.`, {
+      title: "New game started",
+      durationMs: 8000,
+    });
     refresh();
   }
 
   return (
-    <Panel variant="plain" kicker="Danger zone" title="Reset event" pad="md" titleAs="h3" className={s.danger}>
+    <Panel variant="plain" kicker="Game session" title="Start a new game" pad="md" titleAs="h3" className={s.danger}>
       <p className={s.panelText}>
-        For after testing, before class. Wipes all teams, generations, uploads, votes and spend, goes back to Lobby and logs every team out.
-        You stay logged in. Printed code cards keep working.
+        Use after testing, before class. Saves this game under <b>Past games</b> (teams, storyboards, prompts, votes, log; images are kept), then
+        clears the dashboard, goes back to Lobby and logs every team out. You stay logged in. Printed code cards keep working.
       </p>
       <Button variant="danger" onClick={() => setOpen(true)}>
-        Reset event
+        Start new game
       </Button>
       <ConfirmDialog
         open={open}
         danger
-        title="Wipe the whole event?"
+        title="Start a new game?"
         body={
           <p>
-            This deletes every team, generation, uploaded image, vote and all spend, and logs every team out. It cannot be undone.
+            This game is saved under Past games, nothing is deleted. Every team is logged out and the dashboard and projector start empty. Teams rejoin
+            with their code cards.
           </p>
         }
-        requireText="RESET"
-        confirmLabel="Wipe everything"
+        requireText="NEW GAME"
+        confirmLabel="Start new game"
         busy={busy}
-        onConfirm={reset}
+        onConfirm={startNew}
         onCancel={() => setOpen(false)}
       />
     </Panel>

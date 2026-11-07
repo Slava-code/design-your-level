@@ -11,9 +11,9 @@ export const maxDuration = 60;
 export const POST = route(async (req: Request) => {
   await requireAdmin();
   const body = await readJson<Partial<ResetEventRequest>>(req);
-  if (body.confirm !== "RESET") throw new ApiErr("bad_request", 'Type RESET to confirm.');
+  if (body.confirm !== "RESET" && body.confirm !== "NEW GAME") throw new ApiErr("bad_request", "Type NEW GAME to confirm.");
   const r = await resetEvent();
   // Keep the admin who pressed the button logged in under the new epoch.
   await setAdminCookie(r.epoch);
-  return json<ResetEventResponse>({ ok: true, epoch: r.epoch, blobsDeleted: r.blobsDeleted });
+  return json<ResetEventResponse>({ ok: true, epoch: r.epoch, previousGame: r.previousGame });
 });

@@ -8,12 +8,13 @@ import { ControlsTab } from "./ControlsTab";
 import { FeedTab } from "./FeedTab";
 import { ResultsTab } from "./ResultsTab";
 import { TeamsTab } from "./TeamsTab";
+import { GamesTab } from "./GamesTab";
 import { PHASE_LABEL, api, usd } from "./lib";
 import { openProjector } from "./openProjector";
 import { useLiveState, useNow } from "./useLiveState";
 import s from "./admin.module.css";
 
-type TabId = "teams" | "feed" | "controls" | "results";
+type TabId = "teams" | "feed" | "controls" | "results" | "games";
 const TAB_KEY = "dyl-admin-tab";
 
 export function AdminApp() {
@@ -28,7 +29,7 @@ export function AdminApp() {
     if (restored.current) return;
     restored.current = true;
     const saved = window.localStorage.getItem(TAB_KEY) as TabId | null;
-    if (saved && ["teams", "feed", "controls", "results"].includes(saved)) setTab(saved);
+    if (saved && ["teams", "feed", "controls", "results", "games"].includes(saved)) setTab(saved);
   }, []);
   useEffect(() => {
     window.localStorage.setItem(TAB_KEY, tab);
@@ -113,6 +114,7 @@ export function AdminApp() {
             { id: "teams", label: "Teams", badge: st.teams.length || undefined },
             { id: "feed", label: "Feed", badge: tab === "feed" ? undefined : unseen > 99 ? "99+" : unseen || undefined },
             { id: "results", label: "Results" },
+            { id: "games", label: "Past games" },
           ]}
         />
       </div>
@@ -122,6 +124,7 @@ export function AdminApp() {
         {tab === "feed" && <FeedTab feed={live.feed} now={now + live.offsetMs} />}
         {tab === "controls" && <ControlsTab state={st} offsetMs={live.offsetMs} refresh={live.refresh} />}
         {tab === "results" && <ResultsTab state={st} />}
+        {tab === "games" && <GamesTab currentEpoch={st.epoch} />}
       </section>
     </main>
   );

@@ -1,13 +1,11 @@
 // Admin operations: phase changes (with assignment/ranking computation), timer, reveal, reset.
 import "server-only";
 import { PHASES, type Phase, type RevealState, type Scores } from "@/lib/types";
-import { list, del } from "@vercel/blob";
 import { batch, q, type Row } from "./db";
 import { ApiErr } from "./http";
 import { getEvent, type EventRow } from "./event";
 import { logFeed } from "./feed";
 import { computeAssignments, computeRanking, podium, rankingOf, revealState } from "./voting";
-import { blobNamespace } from "./config";
 
 const clampDuration = (v: unknown): number | null => {
   if (v == null || v === "") return null;
@@ -253,22 +251,29 @@ export async function moveReveal(action: unknown, fromStep?: unknown): Promise<R
   return revealState({ ...ev, reveal_step: step })!;
 }
 
-/** Wipe everything, bump the epoch (logs everyone out) and delete this namespace's old Blob files.
- *  First saves a JSON snapshot of the whole event into event_archive (same transaction), so the logs
- *  survive the reset. Skipped when there is nothing to save. */
-export async function resetEvent(): Promise<{ epoch: number; blobsDeleted: number; blobError?: string }> {
+/** Start a new game: save the current game into game_sessions (full snapshot, kept forever), empty
+ *  the live tables, bump the epoch (logs every team out) and open the next game's row. Nothing is
+ *  deleted from Blob: each game's images live under ev<epoch>/, so old snapshots' links keep working. */
+export async function resetEvent(): Promise<{ epoch: number; previousGame: number }> {
   const results = await batch([
+    ["INSERT INTO game_sessions (id) SELECT epoch FROM event_state WHERE id = 1 ON CONFLICT (id) DO NOTHING", []],
     [
-      `INSERT INTO event_archive (epoch, snapshot)
-       SELECT e.epoch, jsonb_build_object(
+      `UPDATE game_sessions gs SET
+              ended_at = now(),
+              snapshot = jsonb_build_object(
                 'event', to_jsonb(e),
                 'teams', COALESCE((SELECT jsonb_agg(to_jsonb(t) ORDER BY t.slot) FROM teams t), '[]'::jsonb),
                 'generations', COALESCE((SELECT jsonb_agg(to_jsonb(g) ORDER BY g.created_at) FROM generations g), '[]'::jsonb),
                 'feed', COALESCE((SELECT jsonb_agg(to_jsonb(f) ORDER BY f.id) FROM feed f), '[]'::jsonb),
                 'assignments', COALESCE((SELECT jsonb_agg(to_jsonb(a)) FROM assignments a), '[]'::jsonb),
-                'votes', COALESCE((SELECT jsonb_agg(to_jsonb(v)) FROM votes v), '[]'::jsonb))
+                'votes', COALESCE((SELECT jsonb_agg(to_jsonb(v)) FROM votes v), '[]'::jsonb)),
+              team_count = (SELECT count(*) FROM teams),
+              generation_count = (SELECT count(*) FROM generations),
+              submission_count = (SELECT count(*) FROM teams WHERE submitted_generation_id IS NOT NULL),
+              spend_usd = (SELECT COALESCE(sum(spend_usd), 0) FROM teams)
          FROM event_state e
-        WHERE e.id = 1 AND (EXISTS (SELECT 1 FROM teams) OR EXISTS (SELECT 1 FROM feed))`,
+        WHERE e.id = 1 AND gs.id = e.epoch
+        RETURNING gs.id`,
       [],
     ],
     ["DELETE FROM votes", []],
@@ -283,27 +288,8 @@ export async function resetEvent(): Promise<{ epoch: number; blobsDeleted: numbe
         WHERE id = 1 RETURNING epoch`,
       [],
     ],
+    ["INSERT INTO game_sessions (id) SELECT epoch FROM event_state WHERE id = 1 ON CONFLICT (id) DO NOTHING", []],
   ]);
-  const epoch = Number(results[7][0].epoch);
-  let blobsDeleted = 0;
-  let blobError: string | undefined;
-  try {
-    // Everything under <ns>ev<N>/ except the new epoch (also catches late uploads from older epochs).
-    const ns = blobNamespace();
-    const keep = `${ns}ev${epoch}/`;
-    let cursor: string | undefined;
-    do {
-      const page = await list({ prefix: `${ns}ev`, cursor, limit: 1000 });
-      const doomed = page.blobs.filter((b) => !b.pathname.startsWith(keep) && /^ev\d+\//.test(b.pathname.slice(ns.length)));
-      if (doomed.length) {
-        await del(doomed.map((b) => b.url));
-        blobsDeleted += doomed.length;
-      }
-      cursor = page.hasMore ? page.cursor : undefined;
-    } while (cursor);
-  } catch (e) {
-    blobError = e instanceof Error ? e.message : String(e);
-    console.error("[reset] blob cleanup failed:", blobError);
-  }
-  return { epoch, blobsDeleted, blobError };
+  const epoch = Number(results[8][0].epoch);
+  return { epoch, previousGame: Number(results[1][0]?.id ?? epoch - 1) };
 }

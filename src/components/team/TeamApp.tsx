@@ -49,7 +49,7 @@ export function TeamApp() {
       if (lastTeam.current || state.sessionExpired) {
         setExpiredMsg(
           lastTeam.current && lastTeam.current.epoch !== state.epoch
-            ? "The event was reset, so everyone was signed out. Join again with your team code."
+            ? "A new game has started, so everyone was signed out. Join again with your team code."
             : "Your session ended. Join again with your team code.",
         );
         lastTeam.current = null;

@@ -121,3 +121,34 @@ CREATE TABLE IF NOT EXISTS event_archive (
 -- Added 2026-11-06: paused countdown. While paused, phase_ends_at is NULL and this holds the
 -- milliseconds that were left; Resume sets phase_ends_at = now() + this.
 ALTER TABLE event_state ADD COLUMN IF NOT EXISTS timer_paused_ms int;
+
+-- Added 2026-11-06: game sessions. One row per game; id = event_state.epoch while that game was live.
+-- "Start new game" fills the old row's snapshot (teams, generations with image links, feed, votes,
+-- assignments, event state incl. ranking) and ended_at, then empties the live tables. Nothing is
+-- deleted from Blob: each game's images live under ev<id>/, so every snapshot's links keep working.
+CREATE TABLE IF NOT EXISTS game_sessions (
+  id                int PRIMARY KEY,
+  started_at        timestamptz NOT NULL DEFAULT now(),
+  ended_at          timestamptz,
+  snapshot          jsonb,
+  team_count        int,
+  generation_count  int,
+  submission_count  int,
+  spend_usd         double precision
+);
+
+-- The game that is live right now gets its row up front.
+INSERT INTO game_sessions (id) SELECT epoch FROM event_state WHERE id = 1 ON CONFLICT (id) DO NOTHING;
+
+-- Earlier resets saved snapshots into event_archive; carry them over as past games.
+INSERT INTO game_sessions (id, started_at, ended_at, snapshot, team_count, generation_count, submission_count, spend_usd)
+SELECT a.epoch,
+       COALESCE((a.snapshot->'feed'->0->>'ts')::timestamptz, a.archived_at),
+       a.archived_at,
+       a.snapshot,
+       jsonb_array_length(COALESCE(a.snapshot->'teams', '[]'::jsonb)),
+       jsonb_array_length(COALESCE(a.snapshot->'generations', '[]'::jsonb)),
+       (SELECT count(*) FROM jsonb_array_elements(COALESCE(a.snapshot->'teams', '[]'::jsonb)) t WHERE t->>'submitted_generation_id' IS NOT NULL),
+       (SELECT COALESCE(sum((t->>'spend_usd')::float8), 0) FROM jsonb_array_elements(COALESCE(a.snapshot->'teams', '[]'::jsonb)) t)
+  FROM event_archive a
+ON CONFLICT (id) DO NOTHING;

@@ -129,8 +129,8 @@ test("real AI: one team, reference upload, questions, storyboard, redraw", async
 
   // Clean up: reset the dev event (deletes this dev namespace's blobs).
   const reset = await (await admin.post("/api/admin/reset-event", { data: { confirm: "RESET" } })).json();
-  console.log("reset: blobsDeleted =", reset.blobsDeleted);
-  expect(reset.blobsDeleted).toBeGreaterThanOrEqual(3);
+  console.log("new game started; saved game", reset.previousGame);
+  expect(reset.ok).toBeTruthy();
   await ctx.close();
   await adminCtx.close();
 });

@@ -33,7 +33,7 @@ export function AdminLogin({ expired, onDone, compact }: { expired?: boolean; on
       <div className={s.loginWrap}>
         {!compact && <Wordmark size="lg" kicker="ENGL 175 · Control room" animate />}
         <Panel variant="terminal" pad="lg" className={s.loginCard} kicker="Presenter only" title="Admin login" pop>
-          {expired && <p className={s.notice}>Your admin session ended (the event was reset). Log in again.</p>}
+          {expired && <p className={s.notice}>Your admin session ended (a new game was started elsewhere). Log in again.</p>}
           <form onSubmit={submit} className={s.loginForm}>
             <label className={s.codeLabel} htmlFor="admin-code">
               Admin code
