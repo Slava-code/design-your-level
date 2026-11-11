@@ -6,7 +6,7 @@ export type WordmarkProps = {
   size?: "sm" | "md" | "lg" | "hero";
   /** stacked (default) or inline (single row, for top bars). */
   layout?: "stacked" | "inline";
-  /** Optional small line above, e.g. "ENGL 175". */
+  /** Optional small line above, e.g. "Live activity". */
   kicker?: string;
   /** Play the slam-in entrance animation. */
   animate?: boolean;

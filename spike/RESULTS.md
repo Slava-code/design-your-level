@@ -1,6 +1,6 @@
 # AI model spike: results (2026-11-04)
 
-Real calls against the "ENGL 175 Activity" OpenAI project, through the actual `src/lib/ai/openai.ts` code.
+Real calls against a dedicated OpenAI project, through the actual `src/lib/ai/openai.ts` code.
 36 image calls, 25 text calls, ~10 free moderation calls. Total spend from the ledger: **$2.25** (cap was $8). That figure counts each blocked image call at our conservative refusal charge ($0.06-0.08). Spend measured from returned `usage` alone is $1.71.
 
 ## Chosen defaults

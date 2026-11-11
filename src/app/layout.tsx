@@ -85,7 +85,7 @@ const fontVars = [plex, bricolage, vt323, specialElite, dmSerif, limelight, cave
 export const metadata: Metadata = {
   title: "Design Your Level",
   description:
-    "ENGL 175 live activity: design a game level with your team, get an AI storyboard, then vote for the best one.",
+    "Live classroom activity: design a game level with your team, get an AI storyboard, then vote for the best one.",
   applicationName: "Design Your Level",
   robots: { index: false, follow: false },
 };

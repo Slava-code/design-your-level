@@ -9,7 +9,7 @@ import path from "node:path";
 const CODES = (process.env.TEAM_CODES || "").split(",").map((s) => s.trim()).filter(Boolean);
 const ADMIN = process.env.ADMIN_CODE || "";
 const OUT = path.resolve(__dirname, "../test-results/screens");
-const REF = path.resolve(__dirname, "../../deck/assets/corridor.jpg");
+const REF = path.resolve(__dirname, "../public/art/hero-corridor-diptych.jpg");
 const PHONE = { width: 390, height: 844 };
 const LAPTOP = { width: 1280, height: 800 };
 

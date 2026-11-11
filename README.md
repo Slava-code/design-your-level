@@ -1,103 +1,163 @@
 # Design Your Level
 
-Live 15-minute class activity for the ENGL 175 "Video Games and Game Design" talk (Tue 11/10, about 28 students in about 7 teams). Each team designs a game level that uses the four aspects from the talk (level, enemy, ability, puzzle). An AI asks up to 3 follow-up questions and draws a 4-panel storyboard. Teams can redraw within a budget, then submit. Each team rates 4 other designs, and the top 3 are revealed on a podium on the projector.
+A Kahoot-style party game I made for my English class project. Teams describe a video game level in words, an AI turns the description into a storyboard, everyone votes on the best design, and the class ends by talking about what the AI got wrong.
 
-- `/` teams (phones and laptops): join with a 3-word code, then lobby, design, voting, reveal.
-- `/admin` presenter control room: phases, timer, teams, live feed, results, reset.
-- `/screen` projector view (needs the admin login in the same browser): big timer, team tiles, podium.
+![A real storyboard: start room, enemy, ability, puzzle at the exit](docs/walkthrough/img/real-storyboard.jpg)
 
-Product spec: `SPEC.md`. Build contract and file ownership: `docs/CONTRACT.md`. Model spike results (costs, latencies, refusal behaviour): `spike/RESULTS.md`.
+## Why it exists
 
-## Stack
+The class was a creativity-focused English course about exploring creativity and where it comes from. My group's presentation was on video game design, split into four aspects: **level, enemy, ability and puzzle**. This game was the closing activity of that presentation.
 
-Next.js 16.4 (App Router, Turbopack) on Vercel, plain CSS modules, Neon Postgres (`@neondatabase/serverless`, HTTP), Vercel Blob (reference uploads and generated storyboards), OpenAI (moderation, `gpt-6-luna` for text, `gpt-image-2.6-flare` for images). Clients poll `GET /api/state` every 2 s; there are no websockets.
+The point was not to have an AI design a level. It was to get the class thinking about how human creativity and AI can work together, where they differ, and where they miscommunicate. The rule on every screen was **"Show, don't tell!"**: teams had to put a level into words vivid and specific enough that someone else (here, an image model) could draw it. The AI is only the illustrator. All the design and writing come from the students. That makes the gap between what a team pictured and what came back the most interesting part of the activity.
 
-## Environment variables
+## How a game goes
 
-Names only; values live in `.env.local` (never committed) and in the Vercel project settings. See `.env.example`.
+1. **Lobby.** Each team (about 4 people, one phone or laptop as the typist) joins with a three-word code from a paper card and can name itself. The projector shows teams as they arrive.
+2. **Design (15 minutes).** Each team fills in an open-ended form: a level from start to exit, an enemy, an ability the player gets, a puzzle, plus genre, feel and art style, with optional reference images. Only genre is multiple choice. Everything else is free text, so the form doesn't box in anyone's ideas.
+   - The AI asks up to three follow-up questions, one round only, about anything vague or strange.
+   - It then draws a single 2x2 storyboard: the start room, the enemy, the ability, and the puzzle at the exit.
+   - Teams can rewrite and redraw as often as their 500 credits allow, go back to an earlier version, and submit or resubmit until time runs out.
+3. **Voting.** Each team anonymously rates four other teams' submissions from 1 to 5 on each of the four aspects. They are told to rate the design, not the art.
+4. **Podium.** The top three are revealed one at a time on the projector, winner last.
+5. **Reflection.** The final screen is a gallery of every submission under the question **"What did the AI get wrong?"** Each phone asks three things: what isn't what you meant, whether it was your words or the AI's misreading, and what you would write differently. In class this led to a discussion of miscommunication. Several teams got back something close to what they described but not what they had pictured, and the class could see whether the description or the model was at fault.
 
-Required in production:
+In class: six teams played one game. They made 9 storyboards and cast 24 votes, and the whole run cost $0.42 in OpenAI usage.
 
-| Name | What |
-|---|---|
-| `OPENAI_API_KEY` | Key for the OpenAI project "ENGL 175 Activity" ($50/month hard cap) |
-| `TEAM_CODES` | Comma-separated 3-word codes; position in the list = Team N |
-| `ADMIN_CODE` | Admin login code |
-| `SESSION_SECRET` | At least 32 characters (64 hex chars from `gen-codes.mjs`); signs the session cookies |
-| `DATABASE_URL` | Neon pooled connection string (database `neondb` is production) |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store token |
-| `TEAM_BUDGET_USD` | Per-team budget, default 5 |
+| Team phone | Projector | Admin |
+|---|---|---|
+| ![Design form](docs/walkthrough/img/15-team-design-filled-full-phone.jpg) | ![Podium reveal](docs/walkthrough/img/53-screen-reveal-3.jpg) | ![Admin teams tab](docs/walkthrough/img/29-admin-teams.jpg) |
 
-Optional (defaults are fine): `DATABASE_URL_UNPOOLED` (used by the migrate script), `TEXT_MODEL`, `IMAGE_MODEL`, `IMAGE_QUALITY` (high), `IMAGE_SIZE` (1536x1024), `IMAGE_MODERATION` (low; `auto` is stricter but refuses ordinary horror), `TEXT_EFFORT_FOLLOWUP`, `TEXT_EFFORT_PROMPT`, `JOIN_RATE_PER_MIN` (20), `JOIN_RATE_PER_HOUR` (120), `ADMIN_RATE_PER_MIN` (5).
+Screenshots are from a rehearsal on mock AI, taken before a few final UI changes. `docs/walkthrough/index.html` is the full facilitator guide, covering every screen and a solo test run; open it locally in a browser.
 
-Development and test only, never set on Vercel production: `DEV_DB_NAME` (use a `dyl_dev_*` database), `MOCK_AI=1` (canned AI at $0), `MOCK_AI_DELAY_MS`, `ALLOW_DEV_ROUTES=1` (enables `/api/dev/*` in a local production build; ignored on Vercel), `NEXT_DIST_DIR`.
+## Architecture
 
-Database selection: `DEV_DB_NAME` wins. Otherwise a production build uses the database named in `DATABASE_URL`, and everything else (local dev, and Vercel preview deployments) uses `dyl_dev_backend`. Dev databases write Blob files under `dev-<db>/`, so a dev reset never touches production files.
+```
+ phones / laptops          presenter laptop
+ ┌────────────┐      ┌──────────────┐ ┌──────────────┐
+ │ /  (teams) │      │ /admin       │ │ /screen      │  (projector tab)
+ └─────┬──────┘      └──────┬───────┘ └──────┬───────┘
+       │   poll GET /api/state every 2 s, POST actions
+       ▼                    ▼                ▼
+ ┌──────────────────────────────────────────────────┐
+ │ Next.js 16 on Vercel (one project: pages + API)  │
+ │  • signed session cookies, phase logic, budgets  │
+ │  • AI pipeline runs in after() (up to 300 s)     │
+ └──────┬───────────────────┬───────────────┬───────┘
+        ▼                   ▼               ▼
+  Neon Postgres        Vercel Blob        OpenAI
+  (all state)     (uploads, storyboards)  moderation → gpt-6-luna → gpt-image-2.6-flare
+```
 
-## Local development
+- **One Next.js app** (App Router, plain CSS modules) serves the team view, the admin control room and the projector view, plus the API routes. There is no separate backend.
+- **Postgres** holds everything: event phase and timer, teams, generations (inputs, questions, answers, prompts, costs), votes and a live feed. Codes are never stored. A team is just its position in the `TEAM_CODES` list.
+- **Vercel Blob** stores reference uploads and the generated storyboards.
+- **Phases** (Lobby → Design → Voting → Reveal → Closed) move only when the presenter presses a button. The countdown is just a display, so a slow team or a bad timer setting can't end a phase by accident.
+- **The AI pipeline** for one generation:
+  1. A free moderation check on the text. It blocks sexual content, hate, harassment and self-harm, but not horror violence.
+  2. `gpt-6-luna` asks 0-3 follow-up questions, on the first draw only unless the team asks again.
+  3. Luna turns the form and answers into one image prompt, with panel captions, a role for each reference image, and a list of anything it changed.
+  4. `gpt-image-2.6-flare` draws one 1536x1024 storyboard.
+
+  If the image model refuses, the pipeline retries once automatically.
+- **Budgets.** Before each AI call the server atomically reserves an upper-bound cost estimate against the team's budget, then settles it to the real cost from the returned token counts. Teams see this as credits (500 credits = $5). A dedicated OpenAI project with a hard monthly cap is the backstop.
+
+## Decisions and why
+
+The whole design follows from the scale: **one classroom (no more than about 30 people, about 7 teams), one 15-minute session, run once.** So every choice went to the simplest thing that would work reliably in a room.
+
+- **Polling instead of websockets.** Vercel's serverless functions don't keep sockets open, and about ten screens asking for state every 2 seconds is trivial load. It still feels live: a button pressed in admin shows up on the projector and the phones within about 2 seconds. Each screen runs its own countdown from the server's end time and clock.
+- **No cache, just the database.** At this size Postgres answers every poll easily. A cache would add a second source of truth and more ways to break, for no benefit.
+- **Neon Postgres and Vercel Blob, both through the Vercel Marketplace.** Real Postgres with no lock-in and a free tier, in the same region as the functions, with one dashboard and env vars injected automatically. Alternatives with built-in auth and storage brought features the app didn't need, and SQLite would have meant running a server.
+- **A deliberately simple AI pipeline.** The goal was "Show, don't tell", not to have an agent do the creative work.
+  - The text model only asks one round of clarifying questions and assembles the team's words into one prompt.
+  - Its only smoothing is softening details the image model would refuse, such as explicit gore. Every change it makes is shown to the team ("What we changed").
+  - The results come back fairly raw. That's the point: the mismatches are what the reflection is about.
+- **One 2x2 image instead of four images.** Consistent style across panels, a quarter of the cost, and fewer calls to fail.
+- **Models picked from a spike.** A spike of 36 image calls and 25 text calls cost $2.25 (`spike/RESULTS.md`). Flare drew in about 10 s against about 50 s for the alternative, at the same price and near-identical quality. A full generation takes about 15-25 s and costs about $0.04-0.06.
+- **Image moderation on "low".** On the stricter default, properly softened PG-13 horror was blocked 3 times out of 4. The real safeguard is the prompt softening plus the moderation check up front.
+- **Pre-generated three-word codes on paper cards.** Easy to type on a phone and hard to guess: three words from a 4,438-word list, with per-IP rate limits on failed joins. The codes live only in environment variables, and the admin and projector screens show only "Team N" and team names.
+- **A small signed cookie instead of a JWT library.** One server signs and checks its own cookies (HMAC-SHA256, constant-time comparison, an epoch that logs everyone out when a new game starts), so a JWT adds nothing.
+- **Open-ended inputs and unlimited redraws within budget.** Multiple choice would have constrained creativity, and image generation is an iterative process.
+
+## How it was tested
+
+- **Spike.** Real calls against the chosen models. They settled the models, the latency, the cost per storyboard and how refusals behave. One problem showed up and got fixed: the image model drawing a team's mascot as a copyrighted character.
+- **Mock AI mode** (`MOCK_AI=1`). Canned AI at $0, with trigger words that force a refusal, a moderation flag or a "what we changed" note.
+- **Playwright dry run** (`e2e/dry-run.spec.ts`). Seven team browsers, an admin and a projector play a full game against a production build on a dev database. It covers joins, renames, generations, redraws and resubmits, refusals and flags, running out of budget, timer controls, voting balance (every design rated exactly four times, never by its own team), the podium and the reset. It also checks that no code ever appears in a page or an API response.
+- **Real-AI end-to-end run** (`e2e/real-ai.spec.ts`, about $0.11). Checks that a team's spend equals the sum of its generation costs. `scripts/smoke.mjs` is an API smoke test.
+- **Reviews and load.** Separate security and UX review passes. On production, a single generation was checked, and seven teams generating at once all finished in under 30 seconds.
+- **Playtest.** Playing one team myself changed the design:
+  - The design phase went from 8 to 15 minutes, with pause, resume and end-now controls.
+  - Budgets show as credits instead of dollars.
+  - "Three rooms" became "start to exit".
+  - The "Show, don't tell!" stamp was added.
+  - The reflection screen was added.
+
+The app was built over four days with AI coding agents (Claude Code), which fits the theme of the class.
+
+## Running it locally
+
+Requires Node 20.12+ and a Postgres database; a free Neon database works. The Blob token is only needed for reference uploads and real storyboards, and the OpenAI key only without mock mode.
 
 ```bash
-npm install                      # .npmrc pins resolution to packages at least 13 days old; never bypass it
-node scripts/gen-codes.mjs       # first time only: fills TEAM_CODES, ADMIN_CODE, SESSION_SECRET in .env.local
-node scripts/migrate.mjs         # applies db/schema.sql to all dev databases (idempotent)
+npm install                      # .npmrc limits installs to package versions at least 13 days old
+cp .env.example .env.local       # then fill in DATABASE_URL (and the others when needed)
+node scripts/gen-codes.mjs       # fills TEAM_CODES, ADMIN_CODE and SESSION_SECRET in .env.local
+node scripts/migrate.mjs         # applies db/schema.sql to the dev databases (idempotent)
 MOCK_AI=1 DEV_DB_NAME=dyl_dev_backend npx next dev -p 3000
 ```
 
-Open http://localhost:3000 (team), http://localhost:3000/admin and http://localhost:3000/screen. With `MOCK_AI=1` the AI is canned and free. The mock reacts to trigger words in the design text: `MOCK_REFUSE` (image refused), `MOCK_FLAG` (moderation flag), `MOCK_SOFTEN` (adds a "What we changed" note), `MOCK_CLEAR` in Level (no follow-up questions).
+Then open http://localhost:3000 (team), http://localhost:3000/admin and http://localhost:3000/screen (the projector needs the admin login in the same browser). `node scripts/print-codes.mjs` writes printable code cards to `print/codes.html` (gitignored).
 
-Several dev servers can run side by side with `NEXT_DIST_DIR=.next-<name>` and different ports. Each run adds `.next-<name>/types` lines to `tsconfig.json`; drop those before committing.
+### Environment variables
 
-`/styleguide` and `/styleguide/podium` are dev-only component galleries (404 in production builds).
+| Name | What |
+|---|---|
+| `OPENAI_API_KEY` | Key for a dedicated OpenAI project with a hard spend limit |
+| `TEAM_CODES` | Comma-separated three-word codes; position in the list = Team N |
+| `ADMIN_CODE` | Admin login code |
+| `SESSION_SECRET` | At least 32 characters; signs the session cookies |
+| `DATABASE_URL` | Postgres connection string (`DATABASE_URL_UNPOOLED` is used by the migrate script) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob store token |
+| `TEAM_BUDGET_USD` | Per-team budget, default 5 |
+| `PLAY_URL` | Public URL of the site, shown and encoded as a QR code on the projector and cards |
 
-## Testing
+Optional overrides: `TEXT_MODEL`, `IMAGE_MODEL`, `IMAGE_QUALITY`, `IMAGE_SIZE`, `IMAGE_MODERATION`, `JOIN_RATE_PER_MIN` (20), `JOIN_RATE_PER_HOUR` (120), `ADMIN_RATE_PER_MIN` (5).
+
+Development only (never on production): `DEV_DB_NAME` (a `dyl_dev_*` database), `MOCK_AI=1`, `MOCK_AI_DELAY_MS`, `ALLOW_DEV_ROUTES=1`, `NEXT_DIST_DIR`.
+
+Which database gets used: `DEV_DB_NAME` wins. Otherwise a production build uses the database in `DATABASE_URL`, and everything else uses `dyl_dev_backend`. Dev databases write Blob files under `dev-<db>/`.
+
+### Tests
 
 ```bash
-npm run typecheck                # tsc --noEmit
-npm run build:qa                 # production build into .next-qa (needed by the e2e suite)
-npm run test:e2e                 # Playwright dry run (below)
+npm run typecheck
+npm run build:qa                 # production build into .next-qa, used by the e2e suite
+npm run test:e2e                 # the Playwright dry run (about 70 s)
+E2E_REAL_AI=1 npx playwright test e2e/real-ai.spec.ts   # one real run, about $0.11
 ```
 
-- `e2e/dry-run.spec.ts`: the full classroom dry run against `next start` on port 3601, `MOCK_AI=1`, database `dyl_dev_qa`. One admin browser with the `/screen` tab, seven team browsers. It covers join (wrong code, forgiving input), renames, Design, a first generation with questions for every team, redraws and two resubmits, a refusal (charged), a moderation flag (not charged), a team running out of budget and the admin resetting it, ask-again plus cancel, history, timer controls, Voting (each team exactly 4 designs, never its own, each design rated exactly 4 times), the 3-step reveal on the projector, Closed, and Reset event logging every team out. It also checks that no team or admin code appears in any page or any API response. About 70 s.
-- `E2E_SCREENS=1 MOCK_AI_DELAY_MS=2500 npx playwright test e2e/screens.spec.ts`: screenshots of every team state (390x844 and 1280x800), admin tab (1440x900) and projector phase (1600x900) into `test-results/screens/`.
-- `E2E_REAL_AI=1 npx playwright test e2e/real-ai.spec.ts`: one real run (real OpenAI and Blob, about $0.11): reference upload, follow-up questions, storyboard, one redraw. It checks that the team's spend equals the summed generation costs, saves the images to `test-results/real/`, then resets the dev event.
-- `scripts/smoke.mjs`: API smoke test against a running dev server (see the header of the file).
+The Playwright config refuses any database not named `dyl_dev_*` and uses the system Chrome.
 
-The Playwright config refuses any database not named `dyl_dev_*` and any `mottonote.app` URL. It uses the system Chrome (`channel: "chrome"`), so it never downloads a browser. Codes are read from `.env.local` and never printed.
+### Deploying (Vercel)
 
-## Deploy (Vercel)
+1. Create a Vercel project. Add Neon and Blob from the Marketplace, then add the variables above for Production. Don't set `DEV_DB_NAME`, `MOCK_AI` or `ALLOW_DEV_ROUTES` there.
+2. Migrate the production database once with `node scripts/migrate.mjs --prod`.
+3. Run `vercel --prod`, and attach a custom domain if you like.
 
-1. Vercel project settings: add the production environment variables above. Do not set `DEV_DB_NAME`, `MOCK_AI` or `ALLOW_DEV_ROUTES` for Production.
-2. Migrate the production database once (the default `node scripts/migrate.mjs` only touches dev databases):
-   ```bash
-   node scripts/migrate.mjs --prod
-   ```
-3. Deploy (`vercel --prod`, or push to the production branch) and attach `play.mottonote.app` to the project.
-4. Smoke check on the live site: log in at `/admin`, open `/screen`, join with one code on a phone, then use Reset event.
+Generation work runs in `after()` with `maxDuration = 300`, the Hobby-plan ceiling. The pipeline gives up at 285 s, and a sweeper releases the budget of anything stuck longer than 6 minutes.
 
-Function limits: every API route runs on the Node.js runtime. Generation work runs in `after()` with `maxDuration = 300` on `/api/generate` and `/api/generate/[id]/answers`, which is the Vercel Hobby ceiling with Fluid compute (default and maximum are both 300 s, checked 2026-11-05). The AI layer's own deadlines keep a worst-case generation under about 280 s (moderation is a single 8 s attempt and fails open), and the pipeline marks a generation as an error itself at 285 s. A typical one takes 20-25 s. Anything stuck longer than 6 minutes is marked as an error by a sweeper, and its budget reservation is released.
+## Status
 
-## Day-of runbook (Tue 11/10)
+The class version ran once and its hosted instance has been shut down. The code is here as a record and in case it's useful to someone running a similar activity.
 
-Before class:
-1. If anything was tested on the live site, log in at `/admin` and go to Controls, then Reset event (type RESET). Every team is logged out, and all generations, votes, uploads and spend are wiped. The codes stay the same, so printed cards keep working.
-2. Print the code cards: `node scripts/print-codes.mjs`, then open `print/codes.html` and print on Letter at 100% scale with background graphics on (6 cards per page). Re-run it if `gen-codes.mjs --force` was ever used. `public/qr-play.svg` is the QR for the deck.
-3. On the presenting laptop, log in at `/admin`, press "Open projector" and screen-share or move the `/screen` tab to the projector. The OpenAI project cap is $50/month; the whole class should cost about $3-5.
+## Credits and license
 
-During the activity (Controls tab):
-1. Lobby: hand out one card per team and tell each team to pick one typist (drafts live on that one device; teammates can follow along with the same code). Team tiles appear on the projector as teams join.
-2. "Start designing" (default 8:00). Use the Timer panel (-1:00, +0:30, +1:00, +2:00, Set, Clear) as needed. The timer is only a display: phases change only when you press the button. Watch the Teams and Feed tabs. If a team runs out of budget, use Reset budget on its row (its work is kept).
-3. "Start voting" (default 4:00). Submissions freeze, and each team gets up to 4 other designs to rate, anonymously. Teams with a storyboard but no submission see a "Not submitted yet" banner (it pulses in the last minute); their designs are not rated.
-4. "Go to the podium", then press the big "Reveal 3rd place", "Reveal 2nd place" and "Reveal the winner" button (a double click never skips a place; "Undo one step" is in the Podium panel). The projector follows within about 2 s. The Results tab hides the ranking behind a spoiler button.
-5. "End and show the gallery": a thanks screen with every submitted storyboard. Pressing it before the winner is revealed asks for confirmation.
+Code and art: MIT (see `LICENSE`). The art in `public/art/` is AI-generated (see `public/art/README.md`).
 
-## Troubleshooting
+Third-party material included here:
 
-- A team says its code doesn't work: the code is forgiving about case, spaces and dashes. Too many wrong codes from one network blocks further wrong codes for up to a minute (20 failed attempts per minute per IP by default; the whole room probably shares one IP). A correct code still gets in unless that network is far over the limit (3x, a scripted burst). Raise `JOIN_RATE_PER_MIN` if needed.
-- A team got logged out: a Reset event or an expired session sends them back to the join screen. Typing the same code again returns them to the same team with all its work.
-- "The image filter blocked this one": the image model refused, usually because a character looked too much like a famous one, or because of gore. The AI layer already retries once automatically. The team should describe characters in its own words and keep gore implied. Refused attempts are charged.
-- "The safety filter stopped this one": the free moderation pre-check flagged the text (sexual, hate, harassment or self-harm; horror violence is allowed). Nothing is charged.
-- "The class AI budget has run out": the OpenAI project hit its monthly cap (the admin Feed shows "OPENAI QUOTA HIT"). Raise the cap in the OpenAI dashboard, or switch to the paper fallback.
-- "The AI is busy right now": OpenAI rate-limited the request even after 3 attempts with backoff. Wait a few seconds and redraw.
-- The projector shows "Log in at /admin": the `/screen` tab needs the admin cookie from the same browser. Log in at `/admin` there and reload.
-- The site is down or slow: use the paper fallback in `SPEC.md`.
-- Logs: Vercel project, then Logs. Server errors are logged with `[api]`, `[pipeline]` or `[ai]` prefixes. Codes and keys are never logged.
+- **EFF large wordlist** (`scripts/eff_large_wordlist.txt`), by the Electronic Frontier Foundation, CC BY 3.0 US: https://www.eff.org/dice
+- **Fonts** in `public/fonts/`, each under its own license (texts in `public/fonts/LICENSES/`):
+  - IBM Plex Sans, Bricolage Grotesque, VT323, DM Serif Display, Limelight, Caveat and Space Grotesk: SIL Open Font License 1.1
+  - Special Elite: Apache 2.0

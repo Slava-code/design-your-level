@@ -102,9 +102,9 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
 
 <header class="hero">
   <div class="wrap">
-    <p class="kicker">ENGL 175 · Games · Tue 11/10 · Van Vleck B215</p>
+    <p class="kicker">Facilitator guide</p>
     <h1>Design <span>Your Level</span></h1>
-    <p class="lede">A 15-minute live activity at https://play.mottonote.app. Teams of 4 describe a game level that uses all four aspects from the talk (level, enemy, ability, puzzle). An AI asks a few follow-up questions and draws it as a 4-panel storyboard. Teams submit their best version, rate 4 other teams' designs, and the top 3 are revealed on a podium.</p>
+    <p class="lede">A 15-minute live classroom activity. Teams of 4 describe a game level that uses four aspects of game design (level, enemy, ability, puzzle). An AI asks a few follow-up questions and draws it as a 4-panel storyboard. Teams submit their best version, rate 4 other teams' designs, and the top 3 are revealed on a podium.</p>
     <p class="sub">This guide covers the whole flow, every screen on the projector, the admin tab and the phones, and a step-by-step playthrough. Click any screenshot to see it full size.</p>
   </div>
 </header>
@@ -163,7 +163,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <h2>The three screens</h2>
   <p class="sub">One website, three views. Codes are never shown on the projector or the admin tab, only on the paper cards.</p>
   <div class="grid3">
-    <div class="card"><span class="who">Teams · phones</span><h3>play.mottonote.app</h3>
+    <div class="card"><span class="who">Teams · phones</span><h3>/, the team view</h3>
       <p>Join with the code, then whatever phase the game is in: lobby, design form, storyboard, voting, "look up" during the reveal, final result.</p></div>
     <div class="card"><span class="who">You · laptop tab</span><h3>/admin, the control room</h3>
       <p>Log in with the admin code. Four tabs: <b>Controls</b> (phases, timer, reveal, spend, reset), <b>Teams</b>, <b>Feed</b>, <b>Results</b>. Never share this tab.</p></div>
@@ -178,11 +178,11 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <h2>Before class</h2>
   <div class="paper">
     <ol class="check">
-      <li><b>Print the code cards</b>: <code>~/Desktop/Dev/ENGL_175/design-your-level/print/codes.pdf</code>, 2 Letter pages, 6 cards per page. Hand out Team 1 to Team 7; Teams 8-12 are spares.</li>
-      <li><b>Open https://play.mottonote.app/admin</b> on the laptop and log in with the admin code. Do this <i>before</i> sharing your screen.</li>
+      <li><b>Print the code cards</b>: <code>node scripts/print-codes.mjs</code>, then print <code>print/codes.html</code> (Letter, 6 cards per page). Hand out one card per team and keep a few spares.</li>
+      <li><b>Open <code>/admin</code></b> on the laptop and log in with the admin code. Do this <i>before</i> sharing your screen.</li>
       <li><b>If you tested earlier:</b> Controls tab → <span class="btn danger">Start new game</span> → type <code>NEW GAME</code>. The test game is saved under <b>Past games</b>; the Teams tab starts empty.</li>
       <li>Click <span class="btn paperbtn">Open projector</span>. It opens <code>/screen</code> in its own tab. Share or mirror <b>only that tab</b> (fullscreen works well).</li>
-      <li>Deck slide 17 has the QR code and the link; the projector lobby shows them too.</li>
+      <li>The projector lobby shows the join link and a QR code.</li>
     </ol>
   </div>
   <div class="shots w3" style="margin-top:22px">
@@ -196,14 +196,14 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
 <section id="s1"><div class="wrap">
   <p class="kicker">Phase 1</p>
   <h2>Lobby: hand out cards, teams join</h2>
-  <p class="sub">About 2 minutes. While you explain the activity (slide 17), teams join.</p>
+  <p class="sub">About 2 minutes. While you explain the activity, teams join.</p>
 
   <div class="step"><div class="num">1</div><div>
     <h3>A team joins with its code</h3>
     <div class="roles">
       <div class="role you"><span class="who">You</span>Hand one card to each team. Say "one typist per team".</div>
       <div class="role"><span class="who">Phone</span><ul>
-        <li>The typist scans the QR or opens play.mottonote.app.</li>
+        <li>The typist scans the QR or opens the site.</li>
         <li>Type the 3 words. Spaces or dashes both work, and capitals don't matter.</li>
         <li>Press <span class="btn">Join</span>.</li>
         <li>A wrong code shakes the field and shows "That code doesn't match any team".</li></ul></div>
@@ -415,7 +415,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <h2>Closed: the gallery</h2>
   <div class="step"><div class="num">13</div><div>
     <h3>End and show the gallery</h3>
-    <p>Press <span class="btn ghost">End and show the gallery</span>. If you press it before the winner is out, it asks "Skip the podium?". The projector shows the reflection gallery: "What did the AI get wrong?" above every submitted storyboard, with the top 3 marked. Each phone shows its entry and the same three questions. Then switch to the Reflection slide (deck slide 18) and ask 2-3 teams.</p>
+    <p>Press <span class="btn ghost">End and show the gallery</span>. If you press it before the winner is out, it asks "Skip the podium?". The projector shows the reflection gallery: "What did the AI get wrong?" above every submitted storyboard, with the top 3 marked. Each phone shows its entry and the same three questions. Then run the reflection: ask 2-3 teams what the AI got wrong and why.</p>
     <div class="shots" style="grid-template-columns:2fr 1fr">
       <figure><a href="img/56-screen-closed.jpg" target="_blank"><img src="img/56-screen-closed.jpg" alt=""></a><figcaption><b>Projector</b>: the gallery</figcaption></figure>
       <figure class="phone"><a href="img/58-team-closed-phone.jpg" target="_blank"><img src="img/58-team-closed-phone.jpg" alt=""></a><figcaption><b>Phone</b>: "You placed 1st. Nice work."</figcaption></figure>
@@ -432,7 +432,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
     <tr><td><b>Design text flagged</b> (clearly inappropriate words, caught before any AI drawing)</td><td>"The safety filter stopped this one", with advice to reword</td><td>Free</td><td>Nothing; they reword. It shows under "Problems" in the Feed.</td></tr>
     <tr><td><b>Image refused</b> by the image model (often a lookalike of a famous cartoon character; one automatic retry happens first)</td><td>"The artist wouldn't draw this version", with tips (describe characters in your own words; horror is fine, gore should be implied)</td><td>Charged (~$0.01-0.06)</td><td>Suggest describing the character as an original design.</td></tr>
     <tr><td><b>Out of credits</b></td><td>"Out of credits for new drawings". They can still submit any storyboard they've made.</td><td>-</td><td>Teams tab → <span class="btn ghost">Reset credits</span> on that team (back to 500 credits, work kept).</td></tr>
-    <tr><td><b>The class OpenAI cap ($50/month) is hit</b></td><td>"The class AI budget has run out. Tell the presenter."</td><td>-</td><td>Very unlikely (a full class is ~$5-15). Raise the limit on platform.openai.com or switch to the paper fallback.</td></tr>
+    <tr><td><b>The OpenAI project spend cap is hit</b></td><td>"The class AI budget has run out. Tell the presenter."</td><td>-</td><td>Very unlikely (a full class is ~$5-15). Raise the limit on platform.openai.com or switch to the paper fallback.</td></tr>
     <tr><td><b>Phone loses Wi-Fi</b></td><td>A "Reconnecting" pill; it catches up when back</td><td>-</td><td>Nothing. The draft is saved on the phone.</td></tr>
     <tr><td><b>Someone opens /screen without admin</b></td><td>"Log in at /admin in this browser first"</td><td>-</td><td>Log in to admin in that browser.</td></tr>
     <tr><td><b>After Reset event</b></td><td>"The event was reset, so everyone was signed out. Join again with your team code."</td><td>-</td><td>Expected.</td></tr>
@@ -464,7 +464,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
         <li>"Back to ..." to step back a phase (asks first).</li>
         <li><b>Running now</b> (the current timer): Pause / Resume, End now, -1:00, +1:00, +2:00, +5:00, Change to, Remove. With no timer running it offers "Start a countdown".</li>
         <li><b>Podium</b>: what's revealed, Undo one step, Hide all.</li>
-        <li><b>OpenAI spend</b>: total for the event plus the $50 cap note.</li>
+        <li><b>OpenAI spend</b>: total for the event.</li>
         <li><b>Reset event</b> (danger zone).</li>
       </ul></td></tr>
     <tr><td><b>Teams</b></td><td>
@@ -488,7 +488,7 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <p class="sub">You play the presenter and 2-3 teams yourself. Each browser window keeps its own login, so a phone, an incognito window and a second browser (Safari) are three separate teams. Three teams is the minimum for a full podium. Each storyboard costs about $0.05, so a full run is under $1.</p>
   <div class="paper">
     <ol class="check">
-      <li><b>Admin.</b> In your main Chrome, open https://play.mottonote.app/admin and paste the admin code. Click <b>Open projector</b> and put the two tabs side by side.</li>
+      <li><b>Admin.</b> In your browser, open <code>/admin</code> and paste the admin code. Click <b>Open projector</b> and put the two tabs side by side.</li>
       <li><b>Teams join.</b> On your phone (scan the QR on any card), in an incognito window and in Safari, join with three different cards. Name them. Check that the projector strip and the admin Teams tab list them by number and name only.</li>
       <li><b>Start designing.</b> Set the timer to something short like <code>5:00</code>, then press <b>Start designing</b>. All three teams switch to the form.</li>
       <li><b>Play one team properly on the phone.</b>
@@ -514,13 +514,13 @@ footer{padding:40px 0 70px;color:#7FA58A;font-size:14px}
   <h2>Reset, costs and the fallback</h2>
   <div class="grid3">
     <div class="card"><span class="who">Reset event</span><h3>Wipes everything</h3><p>All teams, storyboards, uploads, votes and spend are deleted, and every phone is signed out. Your admin session stays. The codes on the cards keep working, so you can reuse the same cards.</p></div>
-    <div class="card"><span class="who">Costs</span><h3>Small</h3><p>About $0.04-0.06 (4-6 credits) per storyboard. A team's 500 credits cover roughly 80-100 draws. Building and testing the site used about $3 of the $50 monthly OpenAI cap. A full class should cost $5-15.</p></div>
+    <div class="card"><span class="who">Costs</span><h3>Small</h3><p>About $0.04-0.06 (4-6 credits) per storyboard. A team's 500 credits cover roughly 80-100 draws. A full class should cost a few dollars (the real class of six teams cost $0.42).</p></div>
     <div class="card"><span class="who">Fallback</span><h3>Paper cards</h3><p>If the site or Wi-Fi fails: use the small paper attendance cards. Each team writes or draws its level, a few present, and the class votes by show of hands.</p></div>
   </div>
 </div></section>
 
 <footer><div class="wrap">
-  Design Your Level · ENGL 175 · Screenshots from the 11/5 rehearsal on fake AI (placeholder storyboards), plus one real storyboard from the live site. Source: https://github.com/Slava-code/design-your-level
+  Design Your Level · Screenshots are from a rehearsal on mock AI (placeholder storyboards) and predate a few final UI changes (credits instead of dollars, 15:00 default timer); one storyboard is real. Source: https://github.com/Slava-code/design-your-level
 </div></footer>
 </body>
 </html>

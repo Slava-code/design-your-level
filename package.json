@@ -1,7 +1,16 @@
 {
-  "name": "app",
-  "version": "0.1.0",
+  "name": "design-your-level",
+  "version": "1.0.0",
   "private": true,
+  "description": "Kahoot-style classroom party game: teams describe a video game level in words, an AI draws it as a storyboard, the class votes, then reflects on what the AI got wrong.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Slava-code/design-your-level.git"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

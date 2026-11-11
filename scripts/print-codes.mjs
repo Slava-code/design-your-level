@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Writes print/codes.html: US-letter pages of cut-out team code cards (6 per page), and
-// public/qr-play.svg: a QR code for https://play.mottonote.app (for the slide deck).
+// public/qr-play.svg: a QR code for PLAY_URL (e.g. for a slide deck; gitignored).
 //
 //   node scripts/print-codes.mjs            # reads TEAM_CODES from .env.local
 //   open print/codes.html                   # then print: Letter, scale 100%, margins "None" or "Default"
@@ -13,8 +13,8 @@ import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const PLAY_HOST = "play.mottonote.app";
-const PLAY_URL = `https://${PLAY_HOST}`;
+const PLAY_URL = process.env.PLAY_URL || "http://localhost:3000";
+const PLAY_HOST = new URL(PLAY_URL).host;
 
 function readCodes() {
   if (process.env.TEAM_CODES) return process.env.TEAM_CODES;
@@ -58,7 +58,7 @@ const card = (code, i) => {
   <article class="card">
     <header class="band">
       <span class="prompt">&gt;</span><span class="design">DESIGN</span><span class="your">Your</span><span class="level">Level</span>
-      <span class="course">ENGL 175</span>
+      <span class="course">Live</span>
     </header>
     <div class="body">
       <div class="top">

@@ -1,13 +1,15 @@
-# Design Your Level: spec
+# Design Your Level: original spec
 
-Live, 15-minute activity at the end of the ENGL 175 "Video Games and Game Design" talk (Tue 11/10). About 28 students in about 7 teams of 4. Each team designs a level that uses all four aspects from the talk (level, enemy, ability, puzzle). An AI asks one round of follow-up questions and draws a 4-panel storyboard. Teams can regenerate within a budget, then submit. Each team rates 4 other designs, and the top 3 are revealed on a podium with the winner last.
+> This is the spec written before the build, kept for history. Some details changed during building and playtesting (the design phase became 15 minutes, budgets are shown as credits, teams can rename at any time, "Start new game" keeps past games, the join limit is 20 per minute). The README describes what shipped.
+
+Live, 15-minute activity at the end of a class presentation on game design. About 30 students in teams of 4. Each team designs a level that uses all four aspects from the talk (level, enemy, ability, puzzle). An AI asks one round of follow-up questions and draws a 4-panel storyboard. Teams can regenerate within a budget, then submit. Each team rates 4 other designs, and the top 3 are revealed on a podium with the winner last.
 
 ## Roles and screens
 
 | Route | Who | What |
 |---|---|---|
 | `/` | Teams (phones/laptops) | Join with a code, then the phase they're in: lobby, design, voting, reveal |
-| `/admin` | Slava (laptop tab) | Login with `ADMIN_CODE`. Tabs: Teams, Feed, Controls |
+| `/admin` | Presenter (laptop tab) | Login with `ADMIN_CODE`. Tabs: Teams, Feed, Controls |
 | `/screen` | Projector (laptop tab, screen-shared by default) | Big timer, phase, live team tiles, podium reveal. Opens only with an admin session. Never shows codes. |
 
 Codes are never sent to any browser and never stored in the database. A code maps to a slot number (its position in `TEAM_CODES`). Everything else refers to "Team N" or the team's chosen name.
@@ -69,7 +71,7 @@ Questions must be short, concrete and answerable in one line. Never ask about so
 ## Budgets and limits
 
 - Per team: `TEAM_BUDGET_USD` = 5. Before each call the server checks that spend plus the estimated cost fits, reserves the estimate, then reconciles it with the real cost.
-- OpenAI project "ENGL 175 Activity": $50/month hard limit (requests fail with 429 once it is hit). This is the backstop. Test spend in November counts toward it too, so the admin screen shows total spend across all teams.
+- A dedicated OpenAI project with a hard monthly spend limit (requests fail with 429 once it is hit). This is the backstop. Test spend counts toward it too, so the admin screen shows total spend across all teams.
 - Join attempts: 5 per minute per IP. Codes are compared in constant time.
 - One generation in flight per team at a time.
 
@@ -85,7 +87,7 @@ Clients poll `/api/state` every 2 s. The response contains the phase, the timer 
 
 ## Architecture
 
-- **Next.js (App Router) on Vercel**, at `play.mottonote.app`. Pages and API routes are in one project, with no separate backend or nginx.
+- **Next.js (App Router) on Vercel**, on a custom subdomain. Pages and API routes are in one project, with no separate backend or nginx.
 - **Postgres** (Neon via the Vercel Marketplace) is the only store for state, with no cache.
 - **Vercel Blob** holds uploaded references and generated images.
 - **OpenAI** for moderation, text and images.
@@ -104,7 +106,7 @@ Clients poll `/api/state` every 2 s. The response contains the phase, the timer 
 ## Environment (`.env.local`, never committed; the same keys go into Vercel)
 
 ```
-OPENAI_API_KEY=      # project "ENGL 175 Activity"
+OPENAI_API_KEY=      # dedicated project with a hard spend limit
 TEAM_CODES=          # comma-separated 3-word codes; position = Team N
 ADMIN_CODE=          # 5 words
 SESSION_SECRET=      # 32 random bytes, hex

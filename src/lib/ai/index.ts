@@ -1,4 +1,4 @@
-// AI layer: public interface (see docs/CONTRACT.md). Real implementations live in ./openai.ts;
+// AI layer: public interface. Real implementations live in ./openai.ts;
 // MOCK_AI=1 returns canned results at zero cost so UI work and e2e tests never touch the API.
 import "server-only";
 

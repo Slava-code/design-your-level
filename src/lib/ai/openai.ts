@@ -1,4 +1,4 @@
-// Real OpenAI implementations of the AI layer (see docs/CONTRACT.md and spike/RESULTS.md).
+// Real OpenAI implementations of the AI layer (see spike/RESULTS.md).
 // index.ts is the public entry point; it calls these only when MOCK_AI !== "1".
 import "server-only";
 import OpenAI, { APIError, APIConnectionError, toFile } from "openai";

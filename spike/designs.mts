@@ -14,7 +14,7 @@ export type SpikeDesign = {
   refs: { file: string; field: "genre" | "feeling" | "artStyle" | "level" | "enemy" | "ability" | "puzzle" | "general" }[];
 };
 
-const DECK = "/Users/slavaiud/Desktop/Dev/ENGL_175/deck";
+const DECK = process.env.DECK_DIR ?? "../deck"; // folder with the reference images used by the spike (not in this repo)
 
 export const DESIGNS: SpikeDesign[] = [
   {

@@ -70,7 +70,7 @@ export function JoinScreen({ message, onJoined }: Props) {
       <div className={s.joinBanner} aria-hidden />
       <div className={s.joinInner}>
         <div className={s.joinMark}>
-          <Wordmark size="lg" kicker="ENGL 175 · Live activity" animate />
+          <Wordmark size="lg" kicker="Live activity" animate />
         </div>
         <form className={cx(s.joinCard, "anim-pop-in")} onSubmit={submit} noValidate>
           {message && (

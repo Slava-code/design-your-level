@@ -54,3 +54,7 @@ spike/out/
 
 # per-agent dev builds
 .next-*/
+
+# local export of the event data (student content)
+archive/
+public/qr-play.svg

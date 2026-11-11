@@ -13,7 +13,7 @@ import os from "node:os";
 const BASE = process.env.BASE_URL || "http://localhost:3401";
 if (/mottonote\.app/.test(BASE) && process.env.E2E_ALLOW_PROD !== "1") throw new Error("Refusing to run against production.");
 const SHOTS = process.env.SHOTS || path.join(os.tmpdir(), "dyl-team-shots");
-const REF_SMALL = process.env.REF_SMALL || "/Users/slavaiud/Desktop/Dev/ENGL_175/deck/assets/bendy-1.jpg";
+const REF_SMALL = process.env.REF_SMALL || new URL("../public/art/hero-split.jpg", import.meta.url).pathname;
 const REF_BIG = process.env.REF_BIG; // > 2048px test image (optional)
 const CODES = (process.env.TEAM_CODES || "").split(",").map((s) => s.trim()).filter(Boolean);
 const ADMIN = process.env.ADMIN_CODE;

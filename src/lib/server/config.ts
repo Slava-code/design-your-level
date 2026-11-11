@@ -62,8 +62,8 @@ const intEnv = (name: string, dflt: number) => {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : dflt;
 };
 export const rateLimits = () => ({
-  // A whole classroom usually shares one public IP, so typos from 28 people add up. Codes are three
-  // random words (~470 billion combinations), so these limits still make guessing hopeless.
+  // A whole classroom usually shares one public IP, so typos from a class add up. Codes are three random
+  // words from a 4,438-word list (~87 billion combinations), so these limits make guessing impractical.
   teamPerMin: intEnv("JOIN_RATE_PER_MIN", 20),
   teamPerHour: intEnv("JOIN_RATE_PER_HOUR", 120),
   adminPerMin: intEnv("ADMIN_RATE_PER_MIN", 5),

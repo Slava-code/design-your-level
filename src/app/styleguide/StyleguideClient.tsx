@@ -101,7 +101,7 @@ export function StyleguideClient() {
       {/* ---------- hero ---------- */}
       <header className={`${s.hero} bg-hero-split`}>
         <div className={s.heroInner}>
-          <Wordmark size="hero" kicker="ENGL 175 / live activity" animate />
+          <Wordmark size="hero" kicker="Live activity" animate />
           <p className={s.heroLede}>
             Design system: <span className="vt glow-text">phosphor</span> meets <span className="hand">ink</span>, with party-game
             energy. Every component below, on both surfaces.

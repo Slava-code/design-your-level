@@ -13,7 +13,7 @@ import path from "node:path";
 const REAL = process.env.E2E_REAL_AI === "1";
 const CODES = (process.env.TEAM_CODES || "").split(",").map((s) => s.trim()).filter(Boolean);
 const ADMIN = process.env.ADMIN_CODE || "";
-const REF = process.env.REF_IMAGE || path.resolve(__dirname, "../../deck/assets/corridor.jpg");
+const REF = process.env.REF_IMAGE || path.resolve(__dirname, "../public/art/hero-corridor-diptych.jpg");
 const OUT = path.resolve(__dirname, "../test-results/real");
 const CAP_USD = 3;
 

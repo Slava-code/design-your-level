@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const PLAY_URL = "https://play.mottonote.app";
+// Public URL teams open on their phones (shown and encoded as a QR code on the projector lobby).
+const PLAY_URL = process.env.PLAY_URL || "http://localhost:3000";
 
 export default async function ScreenPage() {
   // Ink-on-transparent QR, drawn on the parchment card. Generated on the server, so no QR code ships to the browser bundle.
@@ -17,5 +18,5 @@ export default async function ScreenPage() {
     margin: 0,
     color: { dark: "#1A120AFF", light: "#00000000" },
   });
-  return <ScreenApp qrSvg={qrSvg} playHost="play.mottonote.app" />;
+  return <ScreenApp qrSvg={qrSvg} playHost={new URL(PLAY_URL).host} />;
 }
